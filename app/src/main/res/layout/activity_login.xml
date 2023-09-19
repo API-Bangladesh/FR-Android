@@ -42,14 +42,14 @@
                         android:textStyle="bold" />
 
                     <EditText
-                        android:id="@+id/username"
+                        android:id="@+id/employee_ID"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:layout_marginTop="40dp"
                         android:background="@drawable/custom_edit_text"
                         android:drawableLeft="@drawable/person_ic"
                         android:drawablePadding="8dp"
-                        android:hint="User Name"
+                        android:hint="Employee ID"
                         android:padding="8dp"
                         android:textColor="@color/black"
                         android:textSize="20dp"

@@ -17,8 +17,12 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
+import com.shamim.frremoteattendence.sharedpreference.FR_sharedpreference;
 
 import org.greenrobot.eventbus.EventBus;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.List;
@@ -32,10 +36,15 @@ public class LocationService extends Service {
     public static float distanceInMeters;
     public static Location location;
     private static Location specifiedLocation;
+    public static String local_location;
+
     public static double Lat,Long;
+
     @Override
     public void onCreate() {
         super.onCreate();
+         local_location=FR_sharedpreference.Companion.getallowed_locations(this);
+
         specifiedLocation = new Location("");
         specifiedLocation.setLatitude(23.7963977);
         specifiedLocation.setLongitude(90.4024995);
@@ -99,16 +108,51 @@ public class LocationService extends Service {
     }
     public static boolean checkLocationArea(double latitude, double longitude)
     {
+        boolean matchFound = false;
+        // Assuming you have retrieved the `allowedLocationsArray` from SharedPreferences as shown in previous responses
+        try {
+            JSONArray allowedLocationsArray = new JSONArray(local_location);
+
+            double maxDistance = 10.0; // Maximum allowed distance in meters
+            for (int i = 0; i <allowedLocationsArray.length(); i++) {
+                JSONObject locationObject = allowedLocationsArray.getJSONObject(i);
+
+                String latitudeStr = locationObject.getString("latitude");
+                String longitudeStr = locationObject.getString("longitude");
+
+                // Convert latitude and longitude strings to double
+                double local_latitude = Double.parseDouble(latitudeStr);
+                double local_longitude = Double.parseDouble(longitudeStr);
+
+                // Calculate the distance between current location and the location from the array
+                double distance = calculateDistance(latitude, longitude, local_latitude, local_longitude);
+
+                // Check if the distance is less than or equal to the maximum allowed distance
+                if (distance <= maxDistance)
+                {
+                    matchFound = true;
+                    break; // If a match is found, exit the loop
+                }
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return matchFound;
+    }
+
+    private static double calculateDistance(double currentLat, double currentLong, double lat2, double lon2) {
         float[] results = new float[1];
         Location.distanceBetween(
-                specifiedLocation.getLatitude(), specifiedLocation.getLongitude(),
-                latitude, // Replace with actual latitude
-                longitude, // Replace with actual longitude
+                lat2, lon2,
+                currentLat,
+                currentLong,
                 results);
         distanceInMeters = results[0];
 
-        return distanceInMeters <= 5;
+        return distanceInMeters ;
     }
+
     private void getAreaName(double latitude, double longitude) {
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         List<Address> addresses;

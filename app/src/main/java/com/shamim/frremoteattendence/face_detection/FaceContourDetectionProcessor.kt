@@ -13,11 +13,13 @@ import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.ImageView
+import android.widget.Toast
 import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
+import com.shamim.frremoteattendence.LocationService.LocationService
 import com.shamim.frremoteattendence.camerax.BaseImageAnalyzer
 import com.shamim.frremoteattendence.camerax.GraphicOverlay
 import com.shamim.frremoteattendence.interfaces.OnFaceDetectedListener
@@ -38,7 +40,8 @@ class FaceContourDetectionProcessor(
     private  var  handler: Handler=Handler(Looper.getMainLooper())
     private var isImageCaptured = false
     private val faceDetectedListener: OnFaceDetectedListener? = null
-
+    private var countDownStarted = false
+    private  var takePhoto = false
 
     private val realTimeOpts = FaceDetectorOptions.Builder()
         .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
@@ -68,33 +71,69 @@ class FaceContourDetectionProcessor(
         for (face in results) {
             val faceGraphic = FaceContourGraphic(graphicOverlay, face, rect)
             graphicOverlay.add(faceGraphic)
-
             // Add a 2-second delay using a Handler
-            handler.postDelayed({
-                if (!isImageCaptured) {
-                    isImageCaptured = true
-                    Log.d(TAG, "onSuccessImage:$image ")
-                    val b = toBitmap(image)
-                    val rotatedBitmap = b?.let { rotateBitmap(it,rotationDregree.toFloat()) }
-                    val faceRect = face.boundingBox
+            if (results.isEmpty()) {
+                // Handle the case when no faces were detected
+                Log.d(TAG, "No faces detected");
+            }
+            else
+            {
+                if (!countDownStarted)
+                {
+                    countDownStarted = true
+                    Log.d(TAG, "onSuccess: inside if condition")
+                    // Add a 2-second delay using a Handler
+                    handler.postDelayed({
+                        countDownStarted = false
+                        takePhoto = true
+                        Log.d(TAG, "onSuccess: 5 seconds passed")
 
-                    // Capture and save the image
-                    saveCapturedImage(faceBitmap(rotatedBitmap, faceRect))
-
-                    // Display the image on the ImageView
-                    imageView.setImageBitmap(faceBitmap(rotatedBitmap, faceRect))
-
-                    // Set the flag to true to prevent multiple captures
-
+                    }, 2000) // 2-second delay
                 }
 
-            }, 2000) // 2-second delay
+                if (!isImageCaptured && takePhoto) {
+                    if (results.isNotEmpty())
+                    {
+                        isImageCaptured = true
+                        takePhoto = false
+                        Log.d(TAG, "onSuccess:>>Capturing image")
+                        Log.d(TAG, "onSuccessImage:$image ")
+
+                        val b = toBitmap(image)
+                        val rotatedBitmap = b?.let { rotateBitmap(it, rotationDregree.toFloat()) }
+                        val faceRect = face.boundingBox
+                        // Capture and save the image
+                        saveCapturedImage(faceBitmap(rotatedBitmap, faceRect))
+
+                        // Display the image on the ImageView
+                        imageView.setImageBitmap(faceBitmap(rotatedBitmap, faceRect))
+
+                        // Set the flag to true to prevent multiple captures
+
+                    }
+                    }
+            }
+
+
+
+
+
+
+
+//            if (LocationService.location != null)
+//            {
+//                val locationCheck = LocationService.checkLocationArea(LocationService.location.latitude, LocationService.location.longitude)
+//
+//                if (locationCheck)
+//                {
+//                    Toast.makeText(context, "match", Toast.LENGTH_SHORT).show()
+//                }
+//            }
+//
+
         }
         graphicOverlay.postInvalidate()
     }
-
-
-
 
     fun faceBitmap(captureImage: Bitmap?, faceRect: Rect): Bitmap? {
         if (captureImage != null) {

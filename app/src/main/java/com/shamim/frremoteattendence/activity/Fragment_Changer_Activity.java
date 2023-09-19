@@ -32,7 +32,7 @@ import com.shamim.frremoteattendence.utils.InternetCheck_Class;
 import org.json.JSONException;
 import org.json.JSONObject;
 public class Fragment_Changer_Activity extends AppCompatActivity implements InternetCheck {
-    private static final String tokenDeleteURL = "https://txggzf30vf.execute-api.ca-central-1.amazonaws.com/pod/APILimited";;
+    private static final String tokenDeleteURL = "https://frapi.apil.online/employee_permission/logout";;
     final String TAG="FullImageView";
     BottomNavigationView bottomNavigationView;
     String logoutcheckToken;
@@ -98,6 +98,7 @@ public class Fragment_Changer_Activity extends AppCompatActivity implements Inte
                     customDialog.dismiss();
                     if (jsonObject.has("message")) {
                         FR_sharedpreference.Companion.RemoveToken(Fragment_Changer_Activity.this);
+                        FR_sharedpreference.Companion.removeAllowedLocation(Fragment_Changer_Activity.this);
                         Intent intent = new Intent(Fragment_Changer_Activity.this, LoginActivity.class);
                         FR_sharedpreference.Companion.Remove_LoginuserName(Fragment_Changer_Activity.this);
                         startActivity(intent);

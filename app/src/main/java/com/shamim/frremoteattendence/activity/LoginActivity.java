@@ -40,14 +40,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity  implements InternetCheck {
-    private final String TAG="MainActivity";
-    private EditText userName,userPassword;
-    private final String loginURL="https://txggzf30vf.execute-api.ca-central-1.amazonaws.com/pod/login";
-    private final String locationCheckArea="https://frapi.apil.online/location/APILimited";
+    private final String TAG="LoginActivity";
+    private EditText employee_ID,userPassword;
+    private final String loginURL="https://frapi.apil.online/employee_permission/login";
+    private final String tokenCheck_URL="https://frapi.apil.online/employee_permission/check";
     private Button user_LoginBtn;
-    String name,pass;
+    String e_ID,pass;
     CustomDialog customDialog;
     private TextView user_SignupText;
     private CheckBox checkBoxRememberMe;
@@ -58,7 +60,7 @@ public class LoginActivity extends AppCompatActivity  implements InternetCheck {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        userName=findViewById(R.id.username);
+        employee_ID =findViewById(R.id.employee_ID);
         userPassword=findViewById(R.id.userpass);
         user_LoginBtn=findViewById(R.id.user_loginbtn);
         user_SignupText=findViewById(R.id.user_signupText);
@@ -69,9 +71,7 @@ public class LoginActivity extends AppCompatActivity  implements InternetCheck {
         String loginCheckToken= FR_sharedpreference.Companion.getLoginToken(this);
         if (!loginCheckToken.equals(""))
         {
-            Intent intent = new Intent(LoginActivity.this,Fragment_Changer_Activity.class);
-            startActivity(intent);
-            finish();
+          tokenCheck(loginCheckToken);
         }
         else
         {
@@ -82,12 +82,12 @@ public class LoginActivity extends AppCompatActivity  implements InternetCheck {
             @Override
             public void onClick(View view)
             {
-                name=userName.getText().toString().trim();
+                e_ID = employee_ID.getText().toString().trim();
                 pass=userPassword.getText().toString().trim();
 
-                if (name.isEmpty() )
+                if (e_ID.isEmpty() )
                 {
-                    Toast.makeText(LoginActivity.this, "Please Enter Your UserName", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "Please Enter Your ID", Toast.LENGTH_SHORT).show();
                 }
                 else if (pass.isEmpty())
                 {
@@ -99,7 +99,6 @@ public class LoginActivity extends AppCompatActivity  implements InternetCheck {
                     if (InternetCheck_Class.isNetworkConnected(LoginActivity.this))
                     {
                         customDialog.startLoading("Please Wait");
-                        //new FetchDataFromUrlTask().execute("https://frapi.apil.online/location/APILimited");
                         readLoginData();
                     }
                     else
@@ -118,18 +117,18 @@ public class LoginActivity extends AppCompatActivity  implements InternetCheck {
             @Override
             public void onClick(View view) {
                 boolean isChecked = checkBoxRememberMe.isChecked();
-                name=userName.getText().toString().trim();
+                e_ID = employee_ID.getText().toString().trim();
                 pass=userPassword.getText().toString().trim();
 
                 if (isChecked) {
-                    if (name.isEmpty() )
+                    if (e_ID.isEmpty() )
                     {
                         Toast.makeText(LoginActivity.this, "Enter UserName", Toast.LENGTH_SHORT).show();
                         checkBoxRememberMe.setChecked(false);
                     }
                     else
                     {
-                        FR_sharedpreference.Companion.setRememberData(getApplicationContext(),name,pass);
+                        FR_sharedpreference.Companion.setRememberData(getApplicationContext(), e_ID,pass);
                         FR_sharedpreference.Companion.setCheckRememberData(getApplicationContext(),true);
                     }
                 }
@@ -150,7 +149,7 @@ public class LoginActivity extends AppCompatActivity  implements InternetCheck {
         if (data)
         {
             checkBoxRememberMe.setChecked(true);
-            userName.setText(FR_sharedpreference.Companion.getRememberData(getApplicationContext()));
+            employee_ID.setText(FR_sharedpreference.Companion.getRememberData(getApplicationContext()));
         }
 
     }
@@ -160,27 +159,35 @@ public class LoginActivity extends AppCompatActivity  implements InternetCheck {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         JSONObject postData = new JSONObject();
         try {
-            postData.put("Username", name);
-            postData.put("Password", pass);
+            postData.put("E_ID", e_ID);
+            postData.put("password", pass);
         } catch (JSONException e) {
             e.printStackTrace();
         }
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, loginURL, postData, new Response.Listener<JSONObject>() {
+
             @Override
             public void onResponse(JSONObject response) {
                 // Get the value of the 'token' key
                 customDialog.dismiss();
                 try {
+
                     JSONObject jsonObject = new JSONObject(String.valueOf(response));
                     if (jsonObject.has("token")) {
                         String token = jsonObject.getString("token");
-                        JSONObject dataObject = jsonObject.getJSONObject("data");
-                        String username = dataObject.getString("Username");
-                        FR_sharedpreference.Companion.setLoginUsername(username,LoginActivity.this);
                         FR_sharedpreference.Companion.setLoginToken(LoginActivity.this,token);
-                        Intent intent = new Intent(LoginActivity.this,Fragment_Changer_Activity.class);
-                        startActivity(intent);
-                        finish();
+
+                        JSONArray allowedLocationsArray = response.getJSONArray("allowed_locations");
+                        Log.d(TAG, "allowedLocationsArray: "+allowedLocationsArray.length());
+
+                            if (jsonObject.has("allowed_locations")) {
+                                String jsonArrayString = allowedLocationsArray.toString();
+                                FR_sharedpreference.Companion.setallowed_locations(jsonArrayString,LoginActivity.this);
+
+                                Log.d(TAG, "valueArray: "+jsonArrayString);
+
+                            }
+
                     }
                     else
                     {
@@ -226,6 +233,61 @@ public class LoginActivity extends AppCompatActivity  implements InternetCheck {
         Log.d(TAG, "Request Send Time:" + requestQueue);
         jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(6000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
+    }
+
+    private void tokenCheck(String accesstoken)
+    {
+        customDialog.startLoading("please wait");
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, tokenCheck_URL, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response)
+            {
+                Log.i("onResponse", response.toString());
+
+                JSONObject jsonObject = null;
+                try {
+                    jsonObject = new JSONObject(String.valueOf(response));
+                    String access = null;
+
+                    if (jsonObject.has("Access")) {
+                        access = jsonObject.getString("Access");
+                        Intent intent = new Intent(LoginActivity.this,Fragment_Changer_Activity.class);
+                        startActivity(intent);
+                        customDialog.dismiss();
+                        finish();
+                        Log.d(TAG, "access: " + access);
+                    } else {
+                        Log.d(TAG, "not access: " + access);
+                        customDialog.dismiss();
+
+                    }
+
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error)
+            {
+
+                Log.e("onErrorResponse", error.toString());
+                customDialog.dismiss();
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                // Basic Authentication
+                //String auth = "Basic " + Base64.encodeToString(CONSUMER_KEY_AND_SECRET.getBytes(), Base64.NO_WRAP);
+
+                headers.put("Authorization", "Bearer " + accesstoken);
+                return headers;
+            }
+        };
+        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+        queue.add(request);
     }
 
 

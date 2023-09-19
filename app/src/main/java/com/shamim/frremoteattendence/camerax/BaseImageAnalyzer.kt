@@ -15,6 +15,7 @@ import com.google.mlkit.vision.common.InputImage
 @SuppressLint("UnsafeExperimentalUsageError")
 abstract class BaseImageAnalyzer<T>(
     private val captureDelayMillis: Long = 2000 // Delay in milliseconds before capturing
+
 ) : ImageAnalysis.Analyzer {
 
     abstract val graphicOverlay: GraphicOverlay
@@ -22,6 +23,7 @@ abstract class BaseImageAnalyzer<T>(
     private val backgroundHandler = Handler()
 
     @OptIn(ExperimentalGetImage::class) override fun analyze(imageProxy: ImageProxy) {
+
         val mediaImage = imageProxy.image
         val rotationDegrees = imageProxy.imageInfo.rotationDegrees
         mediaImage?.let {

@@ -44,8 +44,6 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback {
         previewView_finder= view.findViewById<PreviewView>(R.id.previewView_finder)
         graphicOverlay_finder= view.findViewById<GraphicOverlay>(R.id.graphicOverlay_finder)
          imageView= view.findViewById<ImageView>(R.id.imageView)
-
-
         checkInternet()
 
     return  view
@@ -59,11 +57,8 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback {
             Permission.CheckGps(activity)
             requireContext().startService(service)
             createCameraManager()
-
-
-        } else {
-//            com.shamim.apifacedetector.fragment.LivePreviewFragment.uploadimageCheck = true
-//            isPhotoDetected = false
+        }
+        else {
             InternetCheck_Class.openInternetDialog(this, true, context)
         }
     }

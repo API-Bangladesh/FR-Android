@@ -48,20 +48,26 @@ class FR_sharedpreference
         }
 
 
-            fun setLoginUsername(name: String?, context: Context) {
+            fun setallowed_locations(allowedlocation: String?, context: Context) {
                 val sharedPreferences =
                     context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
                 val editor = sharedPreferences.edit()
-                editor.putString("name", name)
+                editor.putString("allowedlocation", allowedlocation)
                 editor.apply()
             }
+        fun removeAllowedLocation(context: Context) {
+            val sharedPreferences = context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            editor.remove("allowedlocation")
+            editor.apply()
+        }
 
 
 
-        fun getLoginuserName(context: Context): String? {
+        fun getallowed_locations(context: Context): String? {
             val sharedPreferences =
                 context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
-            return sharedPreferences.getString("name", "")
+            return sharedPreferences.getString("allowedlocation", "")
         }
 
         public open fun Remove_LoginuserName(context: Context) {
