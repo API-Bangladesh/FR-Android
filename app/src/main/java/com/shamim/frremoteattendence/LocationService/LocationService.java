@@ -86,7 +86,6 @@ public class LocationService extends Service {
             e.printStackTrace();
         }
     }
-
     private void removeLocationUpdates() {
         if (locationCallback != null) {
             fusedLocationProviderClient.removeLocationUpdates(locationCallback);
@@ -100,10 +99,9 @@ public class LocationService extends Service {
         if (location != null) {
             Lat=location.getLatitude();
             Long=location.getLatitude();
-            getAreaName(Lat, Long);
+            getAreaName(location.getLatitude(), location.getLongitude());
         } else {
             Toast.makeText(this, "Please wait change for update Location", Toast.LENGTH_SHORT).show();
-
         }
     }
     public static boolean checkLocationArea(double latitude, double longitude)

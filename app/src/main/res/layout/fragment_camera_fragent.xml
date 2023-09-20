@@ -8,7 +8,6 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnSwitch"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -23,14 +22,40 @@
             android:id="@+id/graphicOverlay_finder"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:scaleType="fitCenter"
-            android:layout_marginStart="10dp"
-            android:src="@drawable/common_full_open_on_phone"
-            android:padding="20dp"
-            android:layout_gravity="bottom"/>
+
+
+        <LinearLayout
+            android:padding="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_gravity="bottom"
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/btnSwitch"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="90dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/camera_ic"
+                android:padding="15dp"
+                android:background="@null"
+                android:layout_gravity="bottom"/>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"/>
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:scaleType="fitCenter"
+                android:layout_marginStart="10dp"
+                android:src="@drawable/common_full_open_on_phone"
+                android:padding="10dp"
+                android:layout_gravity="bottom"/>
+        </LinearLayout>
+
+
     </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

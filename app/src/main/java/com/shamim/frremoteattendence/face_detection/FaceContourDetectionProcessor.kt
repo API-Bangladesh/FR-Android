@@ -7,6 +7,7 @@ import android.graphics.ImageFormat
 import android.graphics.Matrix
 import android.graphics.Rect
 import android.graphics.YuvImage
+import android.media.FaceDetector
 import android.media.Image
 import android.os.Handler
 import android.os.Looper
@@ -14,14 +15,19 @@ import android.provider.MediaStore
 import android.util.Log
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import com.shamim.frremoteattendence.LocationService.LocationService
+import com.shamim.frremoteattendence.R
 import com.shamim.frremoteattendence.camerax.BaseImageAnalyzer
 import com.shamim.frremoteattendence.camerax.GraphicOverlay
+import com.shamim.frremoteattendence.fragment.Employee_Data_Fragment
+import com.shamim.frremoteattendence.fragment.LivePreview_Camera
 import com.shamim.frremoteattendence.interfaces.OnFaceDetectedListener
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -35,20 +41,39 @@ class FaceContourDetectionProcessor(
     private  val imageView: ImageView
 ) :
     BaseImageAnalyzer<List<Face>>() {
-   private val uploadimageCheck = false
-    private val isPhotoDetected = false
+
     private  var  handler: Handler=Handler(Looper.getMainLooper())
     private var isImageCaptured = false
-    private val faceDetectedListener: OnFaceDetectedListener? = null
-    private var countDownStarted = false
+   private var countDownStarted = false
     private  var takePhoto = false
+    var prevLeftEyeOpen = true
+    var prevRightEyeOpen = true
+    var leftEyeClosed = false
+    var rightEyeClosed = false
+    var blinkCount = 0
+
+
+
 
     private val realTimeOpts = FaceDetectorOptions.Builder()
         .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
-        .setContourMode(FaceDetectorOptions.CONTOUR_MODE_ALL)
+        .setContourMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
         .build()
 
-    private val detector = FaceDetection.getClient(realTimeOpts)
+
+    private var optionsBuilder = FaceDetectorOptions.Builder()
+        .setPerformanceMode( FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+        .setLandmarkMode( FaceDetectorOptions.LANDMARK_MODE_NONE)
+        .setContourMode( FaceDetectorOptions.CONTOUR_MODE_NONE)
+        .setClassificationMode( FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
+        .setMinFaceSize(0.35f)
+        .enableTracking()
+        .build()
+
+
+
+
+    private val detector = FaceDetection.getClient(optionsBuilder)
     override val graphicOverlay: GraphicOverlay = view
 
     override fun detectInImage(image: InputImage): Task<List<Face>> {
@@ -62,37 +87,81 @@ class FaceContourDetectionProcessor(
             Log.e(TAG, "Exception thrown while trying to close Face Detector: $e")
         }
     }
-
-
     @SuppressLint("SuspiciousIndentation")
-    override fun onSuccess(results: List<Face>, graphicOverlay: GraphicOverlay, rect: Rect, image: Image, rotationDregree:Int
+    override fun onSuccess(faces: List<Face>, graphicOverlay: GraphicOverlay, rect: Rect, image: Image, rotationDregree:Int
     ) {
+
         graphicOverlay.clear()
-        for (face in results) {
+        for (face in faces) {
+
+
             val faceGraphic = FaceContourGraphic(graphicOverlay, face, rect)
             graphicOverlay.add(faceGraphic)
             // Add a 2-second delay using a Handler
-            if (results.isEmpty()) {
-                // Handle the case when no faces were detected
+            if (faces.size==0) {
                 Log.d(TAG, "No faces detected");
+                countDownStarted = false
+                isImageCaptured=false
             }
             else
             {
                 if (!countDownStarted)
                 {
-                    countDownStarted = true
-                    Log.d(TAG, "onSuccess: inside if condition")
-                    // Add a 2-second delay using a Handler
-                    handler.postDelayed({
-                        countDownStarted = false
-                        takePhoto = true
-                        Log.d(TAG, "onSuccess: 5 seconds passed")
+                    if (LocationService.location != null) {
+                        val locationCheck = LocationService.checkLocationArea(
+                            LocationService.location.latitude,
+                            LocationService.location.longitude
+                        )
+                        if (locationCheck) {
+                            Log.d(TAG, "Attendance Location Match:")
+                            val leftEyeOpenProbability = face.leftEyeOpenProbability
+                            val rightEyeOpenProbability = face.rightEyeOpenProbability
+                            // Check if both left and right eyes are open (initial state)
+                            if (leftEyeOpenProbability != null && rightEyeOpenProbability != null) {
+                                val isLeftEyeOpen = leftEyeOpenProbability > 0.3f
+                                val isRightEyeOpen = rightEyeOpenProbability > 0.3f
+                                // Detect a blink when both eyes transition from closed to open
+                                if (!isLeftEyeOpen && prevLeftEyeOpen && !isRightEyeOpen && prevRightEyeOpen) {
+                                    // Blink detected
+                                    leftEyeClosed = true
+                                    rightEyeClosed = true
+                                }
+                                // Check if both eyes transition from closed to open again
+                                if (isLeftEyeOpen && !prevLeftEyeOpen && isRightEyeOpen && !prevRightEyeOpen && leftEyeClosed && rightEyeClosed) {
+                                    // Blink completed
+                                    blinkCount++
+                                    leftEyeClosed = false
+                                    rightEyeClosed = false
+                                }
+                                // Update previous eye states
+                                prevLeftEyeOpen = isLeftEyeOpen
+                                prevRightEyeOpen = isRightEyeOpen
+                            }
+                            if (blinkCount == 2) {
+                                Log.d(TAG, "Blink detected $blinkCount times")
 
-                    }, 2000) // 2-second delay
+                                countDownStarted = true
+                                Log.d(TAG, "onSuccess: inside if condition")
+                                // Add a 2-second delay using a Handler
+                                    countDownStarted = false
+                                    takePhoto = true
+                                    isImageCaptured = false
+                                    blinkCount = 0
+
+                                    Log.d(TAG, "onSuccess: 5 seconds passed")
+                                // 2-second delay
+                            }
+                        }
+                        //AttendanceLocation not match
+                        else{
+
+                        }
+
+                    }
+
                 }
-
                 if (!isImageCaptured && takePhoto) {
-                    if (results.isNotEmpty())
+                    if (faces.isNotEmpty())
                     {
                         isImageCaptured = true
                         takePhoto = false
@@ -104,7 +173,6 @@ class FaceContourDetectionProcessor(
                         val faceRect = face.boundingBox
                         // Capture and save the image
                         saveCapturedImage(faceBitmap(rotatedBitmap, faceRect))
-
                         // Display the image on the ImageView
                         imageView.setImageBitmap(faceBitmap(rotatedBitmap, faceRect))
 
@@ -113,23 +181,6 @@ class FaceContourDetectionProcessor(
                     }
                     }
             }
-
-
-
-
-
-
-
-//            if (LocationService.location != null)
-//            {
-//                val locationCheck = LocationService.checkLocationArea(LocationService.location.latitude, LocationService.location.longitude)
-//
-//                if (locationCheck)
-//                {
-//                    Toast.makeText(context, "match", Toast.LENGTH_SHORT).show()
-//                }
-//            }
-//
 
         }
         graphicOverlay.postInvalidate()

@@ -1,13 +1,13 @@
 package com.shamim.frremoteattendence.fragment
 
+import android.app.Activity
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
-import android.speech.tts.TextToSpeech
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.camera.view.PreviewView
 import androidx.fragment.app.Fragment
@@ -30,10 +30,11 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback {
     private lateinit var cameraManager: CameraManager
     private lateinit var faceDetection: FaceContourDetectionProcessor
 
-    private lateinit var btnSwitch: Button;
+    private lateinit var btnSwitch: ImageButton;
     private  lateinit var graphicOverlay_finder: GraphicOverlay
     private lateinit var previewView_finder: PreviewView
     private lateinit var imageView:ImageView
+    private lateinit var activities:Activity;
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -44,7 +45,13 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback {
         previewView_finder= view.findViewById<PreviewView>(R.id.previewView_finder)
         graphicOverlay_finder= view.findViewById<GraphicOverlay>(R.id.graphicOverlay_finder)
          imageView= view.findViewById<ImageView>(R.id.imageView)
+        btnSwitch= view.findViewById<ImageButton>(R.id.btnSwitch)
+
+        activities= requireActivity()
+
         checkInternet()
+        onClicks()
+
 
     return  view
     }
@@ -75,7 +82,6 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback {
     }
 
     private fun onClicks() {
-        btnSwitch= requireActivity().findViewById<Button>(R.id.btnSwitch)
         btnSwitch.setOnClickListener {
             cameraManager.changeCameraSelector()
         }
@@ -113,6 +119,17 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback {
 //            com.shamim.apifacedetector.fragment.LivePreviewFragment.uploadimageCheck = false
         }
     }
+//    companion object{
+//        public fun navigateToFragment(fragment: Fragment) {
+//            val fragmentManager = requireActivity().supportFragmentManager
+//            val transaction = fragmentManager.beginTransaction()
+//            transaction.replace(R.id.fragment_container, fragment)
+//            transaction.addToBackStack(null)
+//            transaction.commit()
+//        }
+//    }
+
+
 
     private class NetworkQualityTask(private val callback: NetworkQualityCallback?) :
         AsyncTask<Void?, Void?, Boolean>() {

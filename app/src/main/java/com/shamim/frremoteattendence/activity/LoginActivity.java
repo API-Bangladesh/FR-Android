@@ -253,7 +253,10 @@ public class LoginActivity extends AppCompatActivity  implements InternetCheck {
                         access = jsonObject.getString("Access");
                         Intent intent = new Intent(LoginActivity.this,Fragment_Changer_Activity.class);
                         startActivity(intent);
-                        customDialog.dismiss();
+                        if (customDialog !=null)
+                        {
+                            customDialog.dismiss();
+                        }
                         finish();
                         Log.d(TAG, "access: " + access);
                     } else {
