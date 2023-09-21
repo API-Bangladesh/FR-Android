@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
-;import com.android.volley.AuthFailureError;
+import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkError;
 import com.android.volley.NoConnectionError;
@@ -22,6 +22,7 @@ import com.android.volley.toolbox.Volley;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.shamim.frremoteattendence.R;
 import com.shamim.frremoteattendence.alert.CustomDialog;
+import com.shamim.frremoteattendence.face_detection.FaceContourDetectionProcessor;
 import com.shamim.frremoteattendence.fragment.LivePreview_Camera;
 import com.shamim.frremoteattendence.fragment.Employee_Data_Fragment;
 import com.shamim.frremoteattendence.interfaces.InternetCheck;
@@ -41,8 +42,6 @@ public class Fragment_Changer_Activity extends AppCompatActivity implements Inte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fragment_changer);
-
-
         bottomNavigationView = findViewById(R.id.bottomNavigation);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
@@ -184,4 +183,6 @@ public class Fragment_Changer_Activity extends AppCompatActivity implements Inte
             super.onBackPressed();
         }
     }
+
+
 }

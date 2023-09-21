@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,7 +24,7 @@ import com.shamim.frremoteattendence.utils.InternetCheck_Class
 import java.io.IOException
 import java.net.InetAddress
 
-class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback {
+class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback, FaceContourDetectionProcessor.ImageCaptureListener {
     private val TAG = "LivePreviewFragment"
     private var service: Intent? = null
     private val url_img = "https://k7ch2z3we1.execute-api.ca-central-1.amazonaws.com/prod/APILimited"
@@ -47,10 +48,18 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback {
          imageView= view.findViewById<ImageView>(R.id.imageView)
         btnSwitch= view.findViewById<ImageButton>(R.id.btnSwitch)
 
-        activities= requireActivity()
+        faceDetection = FaceContourDetectionProcessor(
+            graphicOverlay_finder,
+            requireContext(),
+            imageView
+        )
+        Log.d(TAG, "onCreateView: $faceDetection")
 
         checkInternet()
         onClicks()
+
+
+
 
 
     return  view
@@ -119,15 +128,25 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback {
 //            com.shamim.apifacedetector.fragment.LivePreviewFragment.uploadimageCheck = false
         }
     }
-//    companion object{
-//        public fun navigateToFragment(fragment: Fragment) {
-//            val fragmentManager = requireActivity().supportFragmentManager
-//            val transaction = fragmentManager.beginTransaction()
-//            transaction.replace(R.id.fragment_container, fragment)
-//            transaction.addToBackStack(null)
-//            transaction.commit()
-//        }
-//    }
+
+
+    override fun onImageCaptured(encodeImage: String) {
+        // Handle the captured image data here
+        // You can save it, display it, or send it as needed
+        Log.d(TAG, "Image Captured: $encodeImage")
+    }
+    init {
+        object {
+            public fun navigateToFragment(fragment: Fragment) {
+                val fragmentManager = requireActivity().supportFragmentManager
+                val transaction = fragmentManager.beginTransaction()
+                transaction.replace(R.id.fragment_container, fragment)
+                transaction.addToBackStack(null)
+                transaction.commit()
+            }
+        }
+    }
+
 
 
 

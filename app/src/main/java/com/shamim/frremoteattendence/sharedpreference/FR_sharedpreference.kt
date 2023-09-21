@@ -1,6 +1,7 @@
 package com.shamim.frremoteattendence.sharedpreference
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Bitmap
 
 class FR_sharedpreference
 {
@@ -69,6 +70,50 @@ class FR_sharedpreference
                 context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
             return sharedPreferences.getString("allowedlocation", "")
         }
+
+        public open fun SaveBitmap(context: Context,base64Image:String) {
+            val sharedPreferences =
+                context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            editor.putString("image", base64Image)
+            editor.apply()
+        }
+        fun getSaveBitmap(context: Context): String? {
+            val sharedPreferences = context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
+           return sharedPreferences.getString("image", "")
+        }
+        public open fun Remove_SaveBitmap(context: Context) {
+            val sharedPreferences =
+                context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            editor.remove("image")
+            editor.apply()
+        }
+
+        public open  fun saveImageResponse(context: Context,imageCheck:Boolean)
+        {
+            val sharedPreferences =
+                context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            editor.putBoolean("uploadImage", imageCheck)
+            editor.apply()
+
+        }
+
+        fun getImageResponse(context: Context): Boolean {
+            val sharedPreferences =
+                context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
+            return sharedPreferences.getBoolean("uploadImage", false)
+        }
+        public open  fun removeImageResponse(context: Context)
+        {
+            val sharedPreferences =
+                context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            editor.remove("uploadImage")
+            editor.apply()
+        }
+
 
         public open fun Remove_LoginuserName(context: Context) {
             val sharedPreferences =

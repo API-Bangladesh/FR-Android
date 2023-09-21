@@ -71,7 +71,7 @@ public class LoginActivity extends AppCompatActivity  implements InternetCheck {
         String loginCheckToken= FR_sharedpreference.Companion.getLoginToken(this);
         if (!loginCheckToken.equals(""))
         {
-          tokenCheck(loginCheckToken);
+            tokenCheck(loginCheckToken);
         }
         else
         {
@@ -180,13 +180,14 @@ public class LoginActivity extends AppCompatActivity  implements InternetCheck {
                         JSONArray allowedLocationsArray = response.getJSONArray("allowed_locations");
                         Log.d(TAG, "allowedLocationsArray: "+allowedLocationsArray.length());
 
-                            if (jsonObject.has("allowed_locations")) {
-                                String jsonArrayString = allowedLocationsArray.toString();
-                                FR_sharedpreference.Companion.setallowed_locations(jsonArrayString,LoginActivity.this);
+                        if (jsonObject.has("allowed_locations")) {
+                            String jsonArrayString = allowedLocationsArray.toString();
+                            FR_sharedpreference.Companion.setallowed_locations(jsonArrayString,LoginActivity.this);
 
-                                Log.d(TAG, "valueArray: "+jsonArrayString);
-
-                            }
+                           Intent loginIntent=new Intent(LoginActivity.this,Fragment_Changer_Activity.class);
+                           startActivity(loginIntent);
+                           finish();
+                        }
 
                     }
                     else
@@ -248,16 +249,16 @@ public class LoginActivity extends AppCompatActivity  implements InternetCheck {
                 try {
                     jsonObject = new JSONObject(String.valueOf(response));
                     String access = null;
-
                     if (jsonObject.has("Access")) {
                         access = jsonObject.getString("Access");
                         Intent intent = new Intent(LoginActivity.this,Fragment_Changer_Activity.class);
                         startActivity(intent);
+                        finish();
                         if (customDialog !=null)
                         {
                             customDialog.dismiss();
                         }
-                        finish();
+
                         Log.d(TAG, "access: " + access);
                     } else {
                         Log.d(TAG, "not access: " + access);
@@ -266,6 +267,8 @@ public class LoginActivity extends AppCompatActivity  implements InternetCheck {
                     }
 
                 } catch (JSONException e) {
+                    Log.d(TAG, "RuntimeException: " +e.getMessage());
+
                     throw new RuntimeException(e);
                 }
 
@@ -274,9 +277,11 @@ public class LoginActivity extends AppCompatActivity  implements InternetCheck {
             @Override
             public void onErrorResponse(VolleyError error)
             {
-
-                Log.e("onErrorResponse", error.toString());
-                customDialog.dismiss();
+                Log.e("onErrorResponse: ", error.toString());
+                if (customDialog !=null)
+                {
+                    customDialog.dismiss();
+                }
             }
         }) {
             @Override
@@ -366,90 +371,4 @@ public class LoginActivity extends AppCompatActivity  implements InternetCheck {
 
         }
     }
-    private static class FetchDataFromUrlTask extends AsyncTask<String, Void, String> {
-
-        @Override
-        protected String doInBackground(String... urls) {
-            if (urls.length == 0) {
-                return null;
-            }
-            String urlString = urls[0];
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-            String responseData = null;
-            try {
-                URL url = new URL(urlString);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-
-                int responseCode = urlConnection.getResponseCode();
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                    StringBuilder responseBuilder = new StringBuilder();
-                    String line;
-
-                    while ((line = reader.readLine()) != null) {
-                        responseBuilder.append(line);
-                    }
-                    responseData = responseBuilder.toString();
-                } else {
-                    Log.e("HTTP GET", "Error response code: " + responseCode);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            return responseData;
-        }
-
-        @Override
-        protected void onPostExecute(String responseData) {
-            super.onPostExecute(responseData);
-
-            if (responseData != null) {
-                try {
-                    JSONArray jsonArray = new JSONArray(responseData);
-
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject locationObject = jsonArray.getJSONObject(i);
-
-                        // Retrieve individual data fields
-                        int id = locationObject.getInt("ID");
-                        String latitude = locationObject.getString("latitude");
-                        String longitude = locationObject.getString("longitude");
-                        String locationName = locationObject.getString("location_name");
-                        String user = locationObject.getString("User");
-                        String eId = locationObject.getString("E_ID");
-
-                        // Now you have the data for each location
-                        // You can use this data as needed
-                        Log.d("Location Data", "ID: " + id);
-                        Log.d("Location Data", "Latitude: " + latitude);
-                        Log.d("Location Data", "Longitude: " + longitude);
-                        Log.d("Location Data", "Location Name: " + locationName);
-                        Log.d("Location Data", "User: " + user);
-                        Log.d("Location Data", "E_ID: " + eId);
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                // Handle the case where there was no response or an error occurred
-                Log.e("HTTP GET", "No response or error occurred");
-            }
-        }
-    }
-
 }

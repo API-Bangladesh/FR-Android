@@ -65,7 +65,7 @@ class CameraManager(
                     }
 
                 val cameraSelector = CameraSelector.Builder()
-                    .requireLensFacing(cameraSelectorOption)
+                    .requireLensFacing(cameraSelectorOption )
                     .build()
 
                 setCameraConfig(cameraProvider, cameraSelector)
