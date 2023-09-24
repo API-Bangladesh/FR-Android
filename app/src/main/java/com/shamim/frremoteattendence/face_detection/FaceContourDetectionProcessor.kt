@@ -25,6 +25,8 @@ import com.shamim.frremoteattendence.LocationService.LocationService
 import com.shamim.frremoteattendence.alert.CustomDialog
 import com.shamim.frremoteattendence.camerax.BaseImageAnalyzer
 import com.shamim.frremoteattendence.camerax.GraphicOverlay
+import com.shamim.frremoteattendence.fragment.LivePreview_Camera
+import com.shamim.frremoteattendence.interfaces.FaceImage
 import com.shamim.frremoteattendence.sharedpreference.FR_sharedpreference
 import com.shamim.frremoteattendence.utils.Encode_and_DecodeBase64Image
 import java.io.ByteArrayOutputStream
@@ -34,7 +36,7 @@ import java.util.Random
 @SuppressLint("UnsafeOptInUsageError")
 class FaceContourDetectionProcessor(
     private val view: GraphicOverlay, private val context: Context, private val imageView: ImageView
-) : BaseImageAnalyzer<List<Face>>() {
+) : BaseImageAnalyzer<List<Face>>(),FaceImage {
 
     private var handler: Handler = Handler(Looper.getMainLooper())
     private var isImageCaptured = false
@@ -46,18 +48,19 @@ class FaceContourDetectionProcessor(
     var rightEyeClosed = false
     var blinkCount = 0
     val customDialog = CustomDialog(context as Activity?)
-    private var imageCaptureListener: ImageCaptureListener? = null
 
+    var myinterface= FaceImage {  }
 
-    interface ImageCaptureListener {
-        fun onImageCaptured(encodeImage: String)
+    interface FaceDetectionListener {
+        fun onFaceDetected(data:String)
     }
 
-    // Add a property to hold the listener
+    // Declare a variable to hold the listener
+    private var faceDetectionListener: FaceDetectionListener? = null
 
     // Setter method for the listener
-    fun setImageCaptureListener(listener: ImageCaptureListener) {
-        imageCaptureListener = listener
+    fun setFaceDetectionListener(listener: FaceDetectionListener) {
+        this.faceDetectionListener = listener
     }
 
 
@@ -113,7 +116,6 @@ class FaceContourDetectionProcessor(
                     val faceGraphic = FaceContourGraphic(graphicOverlay, singleFace, rect)
                     graphicOverlay.add(faceGraphic)
                     // Add a 2-second delay using a Handler
-
                     if (!countDownStarted) {
                         if (LocationService.location != null) {
                             val locationCheck = LocationService.checkLocationArea(
@@ -145,7 +147,7 @@ class FaceContourDetectionProcessor(
                                     prevRightEyeOpen = isRightEyeOpen
                                 }
                                 if (blinkCount == 2) {
-                                    customDialog.startLoading("Take Picture")
+
                                     Log.d(TAG, "Blink detected $blinkCount times")
                                     countDownStarted = true
                                     Log.d(TAG, "onSuccess: inside if condition")
@@ -182,8 +184,11 @@ class FaceContourDetectionProcessor(
                             imageView.setImageBitmap(faceImage)
                             // Set the flag to true to prevent multiple captures
                              val encodeImage=Encode_and_DecodeBase64Image.encodeBitmapImage(faceImage)
+                            LivePreview_Camera.uploadData(context,encodeImage)
+                            faceDetectionListener?.onFaceDetected(encodeImage)
+
+
                             Log.d(TAG, "EncodeImage=$encodeImage")
-                            imageCaptureListener?.onImageCaptured(encodeImage)
 
                             FR_sharedpreference.SaveBitmap(context,encodeImage)
 
@@ -277,6 +282,8 @@ class FaceContourDetectionProcessor(
 
     }
 
+
+
     override fun onFailure(e: Exception) {
         Log.w(TAG, "Face Detector failed.$e")
     }
@@ -284,5 +291,10 @@ class FaceContourDetectionProcessor(
     companion object {
         private const val TAG = "FaceDetectorProcessor"
     }
+
+    override fun callBack(data: String?) {
+        TODO("Not yet implemented")
+    }
+
 
 }

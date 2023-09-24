@@ -45,9 +45,7 @@ abstract class BaseImageAnalyzer<T>(
         }
 
         // Add a delay before capturing the image
-        mainHandler.postDelayed({
-            captureImage(imageProxy)
-        }, captureDelayMillis)
+
     }
 
     protected abstract fun detectInImage(image: InputImage): Task<T>
@@ -64,10 +62,5 @@ abstract class BaseImageAnalyzer<T>(
 
     protected abstract fun onFailure(e: Exception)
 
-    private fun captureImage(imageProxy: ImageProxy) {
-        // Implement image capture logic here
-        // For example, you can capture and process the image
-        // Remember to close the imageProxy when you're done
-        // You can also override this method in your concrete analyzer class
-    }
+
 }

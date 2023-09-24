@@ -99,7 +99,7 @@ public class LocationService extends Service {
         if (location != null) {
             Lat=location.getLatitude();
             Long=location.getLatitude();
-            getAreaName(location.getLatitude(), location.getLongitude());
+            //getAreaName(location.getLatitude(), location.getLongitude());
         } else {
             Toast.makeText(this, "Please wait change for update Location", Toast.LENGTH_SHORT).show();
         }

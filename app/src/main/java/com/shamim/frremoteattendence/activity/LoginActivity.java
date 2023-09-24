@@ -3,7 +3,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -35,23 +34,19 @@ import com.shamim.frremoteattendence.utils.InternetCheck_Class;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity  implements InternetCheck {
     private final String TAG="LoginActivity";
     private EditText employee_ID,userPassword;
+    TextView forgottenPassword;
     private final String loginURL="https://frapi.apil.online/employee_permission/login";
     private final String tokenCheck_URL="https://frapi.apil.online/employee_permission/check";
     private Button user_LoginBtn;
     String e_ID,pass;
     CustomDialog customDialog;
-    private TextView user_SignupText;
     private CheckBox checkBoxRememberMe;
     private Permission permissionHandler;
     @SuppressLint("MissingInflatedId")
@@ -63,8 +58,9 @@ public class LoginActivity extends AppCompatActivity  implements InternetCheck {
         employee_ID =findViewById(R.id.employee_ID);
         userPassword=findViewById(R.id.userpass);
         user_LoginBtn=findViewById(R.id.user_loginbtn);
-        user_SignupText=findViewById(R.id.user_signupText);
+        forgottenPassword =findViewById(R.id.forgotten_password);
         checkBoxRememberMe=findViewById(R.id.checkBoxRememberMe);
+
         customDialog= new CustomDialog(this);
         permissionHandler=new Permission();
 
@@ -138,6 +134,15 @@ public class LoginActivity extends AppCompatActivity  implements InternetCheck {
                     FR_sharedpreference.Companion.setCheckRememberData(getApplicationContext(),false);
                 }
 
+            }
+        });
+
+        forgottenPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent forgottenIntent=new Intent(LoginActivity.this,Forgotten_password_Activity.class);
+                startActivity(forgottenIntent);
+                finish();
             }
         });
     }
