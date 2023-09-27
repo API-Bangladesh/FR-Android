@@ -1,7 +1,6 @@
 package com.shamim.frremoteattendence.face_detection
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -12,7 +11,7 @@ import android.graphics.YuvImage
 import android.media.Image
 import android.os.Handler
 import android.os.Looper
-import android.provider.MediaStore
+import android.provider.MediaStore.Images.Media.insertImage
 import android.util.Log
 import android.widget.ImageView
 import android.widget.Toast
@@ -22,12 +21,10 @@ import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import com.shamim.frremoteattendence.LocationService.LocationService
-import com.shamim.frremoteattendence.alert.CustomDialog
 import com.shamim.frremoteattendence.camerax.BaseImageAnalyzer
 import com.shamim.frremoteattendence.camerax.GraphicOverlay
-import com.shamim.frremoteattendence.fragment.LivePreview_Camera
-import com.shamim.frremoteattendence.interfaces.FaceImage
-import com.shamim.frremoteattendence.sharedpreference.FR_sharedpreference
+import com.shamim.frremoteattendence.fragment.LivePreview_Camera.Companion.imageCaptureChecked
+import com.shamim.frremoteattendence.interfaces.OnFaceDetectedListener
 import com.shamim.frremoteattendence.utils.Encode_and_DecodeBase64Image
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -35,33 +32,22 @@ import java.util.Random
 
 @SuppressLint("UnsafeOptInUsageError")
 class FaceContourDetectionProcessor(
-    private val view: GraphicOverlay, private val context: Context, private val imageView: ImageView
-) : BaseImageAnalyzer<List<Face>>(),FaceImage {
+    private val view: GraphicOverlay,
+    private val context: Context,
+    private val imageView: ImageView,
+    private val faceEncodeImage: OnFaceDetectedListener
+) : BaseImageAnalyzer<List<Face>>() {
 
     private var handler: Handler = Handler(Looper.getMainLooper())
-    private var isImageCaptured = false
-    private var countDownStarted = false
-    private var takePhoto = false
-    var prevLeftEyeOpen = true
-    var prevRightEyeOpen = true
-    var leftEyeClosed = false
-    var rightEyeClosed = false
-    var blinkCount = 0
-    val customDialog = CustomDialog(context as Activity?)
+    private var prevLeftEyeOpen = true
+    private var prevRightEyeOpen = true
+    private var leftEyeClosed = false
+    private var rightEyeClosed = false
+    private var blinkCount = 0
+    private var singleFaceCounter = 0
 
-    var myinterface= FaceImage {  }
-
-    interface FaceDetectionListener {
-        fun onFaceDetected(data:String)
-    }
 
     // Declare a variable to hold the listener
-    private var faceDetectionListener: FaceDetectionListener? = null
-
-    // Setter method for the listener
-    fun setFaceDetectionListener(listener: FaceDetectionListener) {
-        this.faceDetectionListener = listener
-    }
 
 
 //    private val realTimeOpts = FaceDetectorOptions.Builder()
@@ -98,31 +84,21 @@ class FaceContourDetectionProcessor(
     }
 
     @SuppressLint("SuspiciousIndentation")
-    override fun onSuccess(
-        faces: List<Face>,
-        graphicOverlay: GraphicOverlay,
-        rect: Rect,
-        image: Image,
-        rotationDregree: Int
+    override fun onSuccess(results: List<Face>, graphicOverlay: GraphicOverlay, rect: Rect, mediaImage: Image, rotationDegree: Int
     ) {
-
         graphicOverlay.clear()
-        if (faces.isNotEmpty()) {
-            for (face in faces) {
-                if (faces.size == 1)
-                {
-                    Log.d(TAG,"Single_FaceDetected")
-                    val singleFace = faces[0] // Get the first detected face
+        if (results.isNotEmpty()) {
+            for (face in results) {
+                if (results.size == 1) {
+                    val singleFace = results[0] // Get the first detected face
                     val faceGraphic = FaceContourGraphic(graphicOverlay, singleFace, rect)
                     graphicOverlay.add(faceGraphic)
-                    // Add a 2-second delay using a Handler
-                    if (!countDownStarted) {
-                        if (LocationService.location != null) {
-                            val locationCheck = LocationService.checkLocationArea(
-                                LocationService.location.latitude, LocationService.location.longitude
-                            )
-                            if (locationCheck) {
-                                Log.d(TAG, "Attendance Location Match:")
+                    if (LocationService.location != null) {
+                        val locationCheck = LocationService.checkLocationArea(
+                            LocationService.location.latitude, LocationService.location.longitude
+                        )
+                        if (locationCheck) {
+                            if (!imageCaptureChecked) {
                                 val leftEyeOpenProbability = face.leftEyeOpenProbability
                                 val rightEyeOpenProbability = face.rightEyeOpenProbability
                                 // Check if both left and right eyes are open (initial state)
@@ -139,6 +115,7 @@ class FaceContourDetectionProcessor(
                                     if (isLeftEyeOpen && !prevLeftEyeOpen && isRightEyeOpen && !prevRightEyeOpen && leftEyeClosed && rightEyeClosed) {
                                         // Blink completed
                                         blinkCount++
+                                        Log.d(TAG, "blinkCount: $blinkCount")
                                         leftEyeClosed = false
                                         rightEyeClosed = false
                                     }
@@ -147,97 +124,74 @@ class FaceContourDetectionProcessor(
                                     prevRightEyeOpen = isRightEyeOpen
                                 }
                                 if (blinkCount == 2) {
+                                    if (results.isNotEmpty()) {
+                                        blinkCount = 0
+                                            val bitmapImage = toBitmap(mediaImage)
+                                            val rotatedBitmap = bitmapImage?.let {
+                                                rotateBitmap(
+                                                    it, rotationDegree.toFloat()
+                                                )
+                                            }
+                                            val faceRect = face.boundingBox
+                                            val faceImage: Bitmap? = faceBitmap(rotatedBitmap, faceRect)
+                                            Log.d(TAG, "Image Captured")
+                                            saveCapturedImage(faceImage)
+                                            imageView.setImageBitmap(faceImage)
+                                            val encodeImage = Encode_and_DecodeBase64Image.encodeBitmapImage(faceImage)
 
-                                    Log.d(TAG, "Blink detected $blinkCount times")
-                                    countDownStarted = true
-                                    Log.d(TAG, "onSuccess: inside if condition")
-                                    // Add a 2-second delay using a Handler
-                                    countDownStarted = false
-                                    takePhoto = true
-                                    isImageCaptured = false
-                                    blinkCount = 0
-                                    Log.d(TAG, "onSuccess: 5 seconds passed")
-                                    // 2-second delay
+                                        if (encodeImage!=null)
+                                        {
+                                            imageCaptureChecked=true
+
+                                            faceEncodeImage.onFaceDetected(encodeImage)
+
+                                        }
+                                        else
+                                        {
+                                            imageCaptureChecked=false
+
+                                        }
+
+                                    } else {
+                                        Toast.makeText(
+                                            context, "Please give Your Face", Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                } else {
+                                    //if Blink Count is 3, it will be 0
+                                    if (blinkCount > 2) {
+                                        blinkCount = 0
+                                    }
                                 }
                             }
-                            //AttendanceLocation not match
-                            else
-                            {
-
                             }
+                        else {
+                            faceEncodeImage.onFaceDetectedListener = true
                         }
-
                     }
-                    if (!isImageCaptured && takePhoto) {
-                        if (faces.isNotEmpty()) {
-                            isImageCaptured = true
-                            takePhoto = false
-                            Log.d(TAG, "onSuccess:>>Capturing image")
-                            Log.d(TAG, "onSuccessImage:$image ")
-                            val b = toBitmap(image)
-                            val rotatedBitmap = b?.let { rotateBitmap(it, rotationDregree.toFloat()) }
-                            val faceRect = face.boundingBox
-                            // Capture and save the image
-                            val faceImage:Bitmap?=faceBitmap(rotatedBitmap, faceRect)
-                            saveCapturedImage(faceImage)
-                            // Display the image on the ImageView
-                            imageView.setImageBitmap(faceImage)
-                            // Set the flag to true to prevent multiple captures
-                             val encodeImage=Encode_and_DecodeBase64Image.encodeBitmapImage(faceImage)
-                            LivePreview_Camera.uploadData(context,encodeImage)
-                            faceDetectionListener?.onFaceDetected(encodeImage)
-
-
-                            Log.d(TAG, "EncodeImage=$encodeImage")
-
-                            FR_sharedpreference.SaveBitmap(context,encodeImage)
-
-
+                } else {
+                    singleFaceCounter++
+                    if (singleFaceCounter <= 2) {
+                        Toast.makeText(context, "Please Give Single Face", Toast.LENGTH_SHORT)
+                            .show()
+                    } else {
+                        if (singleFaceCounter == 3) {
+                            handler.postDelayed({
+                                singleFaceCounter = 0
+                            }, 2000)
                         }
                     }
                 }
-                else
-                {
-                    if (faces.size >1){
-                        Log.d(TAG,"Multi_FaceDetected")
-                        Toast.makeText(context, "Please Give Single Face", Toast.LENGTH_SHORT).show()
-
-                    }
-                }
-
             }
-        } else {
-            countDownStarted = false
-            isImageCaptured = false
+        } else
+        {
+            imageCaptureChecked=false
         }
         graphicOverlay.postInvalidate()
     }
 
-    fun faceBitmap(captureImage: Bitmap?, faceRect: Rect): Bitmap? {
-        if (captureImage != null) {
-            // Ensure that the faceRect is within the bounds of the captureImage
-            if (faceRect.left >= 0 && faceRect.top >= 0 && faceRect.right <= captureImage.width && faceRect.bottom <= captureImage.height) {
-                return Bitmap.createBitmap(
-                    captureImage, faceRect.left, faceRect.top, faceRect.width(), faceRect.height()
-                )
-            }
-        }
-        return null
-    }
-
-    fun getImageFormat(image: Image): String {
-        val format = image.format
-        return when (format) {
-            ImageFormat.YUV_420_888 -> "YUV_420_888"
-            ImageFormat.JPEG -> "JPEG"
-            ImageFormat.NV21 -> "NV21"
-            // Add more cases for other formats as needed
-            else -> "Unknown Format"
-        }
-    }
-
     private fun toBitmap(image: Image): Bitmap? {
-        Log.d(TAG, "toBitmap: $image")
+        val bitmap:Bitmap?
         val planes = image.planes
         val yBuffer = planes[0].buffer
         val uBuffer = planes[1].buffer
@@ -254,10 +208,29 @@ class FaceContourDetectionProcessor(
         val out = ByteArrayOutputStream()
         yuvImage.compressToJpeg(Rect(0, 0, yuvImage.width, yuvImage.height), 100, out)
         val imageBytes = out.toByteArray()
-        return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+        bitmap= BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
 
+        return bitmap
     }
 
+
+    private fun faceBitmap(captureImage: Bitmap?, faceRect: Rect): Bitmap? {
+        if (captureImage != null) {
+            if (faceRect.left >= 0 && faceRect.top >= 0 && faceRect.right <= captureImage.width && faceRect.bottom <= captureImage.height) {
+                return Bitmap.createBitmap(
+                    captureImage, faceRect.left, faceRect.top, faceRect.width(), faceRect.height()
+                )
+            } else {
+               imageCaptureChecked=false
+                Toast.makeText(context, "Please Give your Face Properly", Toast.LENGTH_SHORT).show()
+            }
+        }
+        else
+        {
+            imageCaptureChecked=false
+        }
+        return null
+    }
     private fun rotateBitmap(bitmap: Bitmap, degrees: Float): Bitmap {
         val matrix = Matrix()
         matrix.postRotate(degrees)
@@ -270,19 +243,15 @@ class FaceContourDetectionProcessor(
             val rand = Random()
             val randNo = rand.nextInt()
             val bytes = ByteArrayOutputStream()
-            capturedBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
-            val path: String = MediaStore.Images.Media.insertImage(
-                context.contentResolver, capturedBitmap, randNo.toString(), null
-            )
-            isImageCaptured = false
-        } else {
-
+            capturedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
+             insertImage(context.contentResolver, capturedBitmap, randNo.toString(), null)
+        } else
+        {
+            imageCaptureChecked =false
         }
 
 
     }
-
-
 
     override fun onFailure(e: Exception) {
         Log.w(TAG, "Face Detector failed.$e")
@@ -290,10 +259,6 @@ class FaceContourDetectionProcessor(
 
     companion object {
         private const val TAG = "FaceDetectorProcessor"
-    }
-
-    override fun callBack(data: String?) {
-        TODO("Not yet implemented")
     }
 
 

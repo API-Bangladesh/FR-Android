@@ -1,19 +1,19 @@
 package com.shamim.frremoteattendence.fragment
 
-import android.app.Activity
-import android.app.ProgressDialog
-import android.content.Context
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Handler
 import android.speech.tts.TextToSpeech
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.camera.view.PreviewView
 import androidx.fragment.app.Fragment
@@ -32,11 +32,11 @@ import com.shamim.frremoteattendence.R
 import com.shamim.frremoteattendence.alert.CustomDialog
 import com.shamim.frremoteattendence.camerax.CameraManager
 import com.shamim.frremoteattendence.camerax.GraphicOverlay
-import com.shamim.frremoteattendence.face_detection.FaceContourDetectionProcessor
-import com.shamim.frremoteattendence.interfaces.FaceImage
 import com.shamim.frremoteattendence.interfaces.InternetCheck
 import com.shamim.frremoteattendence.interfaces.NetworkQualityCallback
+import com.shamim.frremoteattendence.interfaces.OnFaceDetectedListener
 import com.shamim.frremoteattendence.permission.Permission
+import com.shamim.frremoteattendence.sharedpreference.FR_sharedpreference
 import com.shamim.frremoteattendence.utils.InternetCheck_Class
 import org.json.JSONException
 import org.json.JSONObject
@@ -45,14 +45,25 @@ import java.net.InetAddress
 import java.util.Calendar
 import java.util.Locale
 
-class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback ,FaceContourDetectionProcessor.FaceDetectionListener,FaceImage{
+class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,OnFaceDetectedListener{
     private var service: Intent? = null
+    private var TAG:String?="LivePreview_Camera"
     private lateinit var cameraManager: CameraManager
-    private lateinit var faceDetection: FaceContourDetectionProcessor
     private lateinit var btnSwitch: ImageButton;
     private  lateinit var graphicOverlay_finder: GraphicOverlay
     private lateinit var previewView_finder: PreviewView
     private lateinit var imageView:ImageView
+    private val url_img = "https://k7ch2z3we1.execute-api.ca-central-1.amazonaws.com/prod/APILimited"
+    private lateinit var customDialog:CustomDialog
+    private var handler: Handler? = null
+    private var toast: Toast? = null
+    private var tts_Object: TextToSpeech? = null
+    private var encodeImageString: String? = null
+    private var view: View?=null
+    companion object{
+        var imageCaptureChecked=false;
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -65,22 +76,13 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback ,F
         graphicOverlay_finder= view.findViewById<GraphicOverlay>(R.id.graphicOverlay_finder)
          imageView= view.findViewById<ImageView>(R.id.imageView)
         btnSwitch= view.findViewById<ImageButton>(R.id.btnSwitch)
+        customDialog=CustomDialog(requireActivity())
+        handler = Handler()
 
-        faceDetection = FaceContourDetectionProcessor(
-            graphicOverlay_finder,
-            requireContext(),
-            imageView
-        )
 
         // Set the fragment as the listener for face detection events
-        faceDetection.setFaceDetectionListener(this)
-
 
         checkInternet()
-        onClicks()
-
-
-
     return  view
     }
 
@@ -92,6 +94,8 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback ,F
             Permission.CheckGps(activity)
             requireContext().startService(service)
             createCameraManager()
+            textToSpcheechMethod()
+            onClicks()
         }
         else {
             InternetCheck_Class.openInternetDialog(this, true, context)
@@ -105,6 +109,7 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback ,F
             graphicOverlay_finder
             ,
             imageView
+        ,this
         )
         cameraManager.startCamera()
     }
@@ -126,38 +131,6 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback ,F
 
     override fun onRetry() {
         TODO("Not yet implemented")
-    }
-
-    override fun onNetworkQualityCheck(isGoodConnection: Boolean) {
-        if (isGoodConnection) {
-//            // Good connection
-//            if (encodeImageString != null) {
-//                uploadimagedb(encodeImageString)
-//                encodeImageString = null
-//            } else {
-//                com.shamim.apifacedetector.fragment.LivePreviewFragment.uploadimageCheck = false
-//            }
-        } else {
-//            customDialog.dismiss()
-//            // Poor connection
-//            tts_Object.speak("Please Check Internet ", TextToSpeech.QUEUE_FLUSH, null, null)
-//            imgCapture.setImageBitmap(null)
-//            showToastOnUiThread("Connection is Poor")
-//            isPhotoDetected = false
-//            com.shamim.apifacedetector.fragment.LivePreviewFragment.uploadimageCheck = false
-        }
-    }
-
-    init {
-        object {
-            public fun navigateToFragment(fragment: Fragment) {
-                val fragmentManager = requireActivity().supportFragmentManager
-                val transaction = fragmentManager.beginTransaction()
-                transaction.replace(R.id.fragment_container, fragment)
-                transaction.addToBackStack(null)
-                transaction.commit()
-            }
-        }
     }
 
 
@@ -187,154 +160,205 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback ,F
 
     }
 
-    override fun onFaceDetected(data:String) {
-        Log.d(TAG, "Face Detected Successfully: $data")
-        Toast.makeText(requireContext(), "Face Detected Successfully", Toast.LENGTH_SHORT).show()
+    override fun onPause() {
+        super.onPause()
 
-    }
-    fun ted(){
-
+        requireContext().stopService(service)
     }
 
-    companion object{
+    override fun onDestroy() {
+        super.onDestroy()
 
-        private val TAG = "LivePreviewFragment"
-        val url_img = "https://k7ch2z3we1.execute-api.ca-central-1.amazonaws.com/prod/APILimited"
-        private var tts_Object: TextToSpeech? = null
+        if (tts_Object != null) {
+            tts_Object!!.stop()
+            tts_Object!!.shutdown()
+        }
+        requireContext().stopService(service)
+    }
+
+    override fun onFaceDetected(encodeImage: String?)
+    {
+        customDialog.startLoading("Recognition...")
+
+        encodeImageString=encodeImage
+        NetworkQualityTask(this)
+            .execute()
+
+    }
 
 
-        fun uploadData(context:Context,encodeImage:String)
-        {
-            Log.d(TAG, "Send Data: ")
-             fun textToSpcheechMethod() {
-                tts_Object = TextToSpeech(context) { i ->
-                    if (i != TextToSpeech.ERROR) {
-                        tts_Object?.setLanguage(Locale("en", "US"))
-                    } else {
-                    }
-                }
+    override fun onNetworkQualityCheck(isGoodConnection: Boolean) {
+        if (isGoodConnection) {
+            // Good connection
+            if (encodeImageString != null) {
+                uploadimagedb(encodeImageString!!)
+                encodeImageString = null
             }
 
-           val progressDialog = ProgressDialog(context)
-            progressDialog?.setMessage("Loading...") // Set your message here
-            progressDialog?.setCancelable(false)
-            progressDialog?.show()
 
-            val customDialog:CustomDialog=CustomDialog(context as Activity?)
-
-            val handler=Handler()
-
-            val base64_img = "data:image/jpg;base64,$encodeImage"
-                val requestQueue = Volley.newRequestQueue(context)
-                val postData = JSONObject()
+        } else {
+            customDialog.dismiss()
+            // Poor connection
+            tts_Object?.speak("Please Check Internet ", TextToSpeech.QUEUE_FLUSH, null, null)
+            imageView.setImageBitmap(null)
+            showToastOnUiThread("Connection is Poor")
+            imageCaptureChecked=false        }
+    }
+    private fun uploadimagedb(encodeImageString: String)
+    {
+        Log.d(TAG, "uploadimagedb: $imageCaptureChecked")
+        NetworkQualityTask(this).execute()
+        val base64_img = "data:image/jpg;base64,$encodeImageString"
+        val requestQueue = Volley.newRequestQueue(context)
+        val postData = JSONObject()
+        try {
+            postData.put("base64Img", base64_img)
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+        val jsonObjectRequest = JsonObjectRequest(Request.Method.POST, url_img, postData,
+            { response ->
+                Log.d(TAG, "Request Get Time:$response")
+                val calendar = Calendar.getInstance()
+                val hourOfDay = calendar[Calendar.HOUR_OF_DAY]
+                customDialog.dismiss()
                 try {
-                    postData.put("base64Img", base64_img)
-                } catch (e: JSONException) {
-                    e.printStackTrace()
-                }
-                val jsonObjectRequest = JsonObjectRequest(
-                    Request.Method.POST,
-                    url_img,
-                    postData,
-                    { response ->
-                        Log.d(
-                           TAG,
-                            "Request Get Time:$response"
-                        )
-                        val calendar = Calendar.getInstance()
-                        val hourOfDay = calendar[Calendar.HOUR_OF_DAY]
+                    val jsonObject = JSONObject(response.toString())
+                    val responseObject = jsonObject.getJSONObject("response")
+                    val nameArray = responseObject.getJSONArray("Name")
+                    val nameValue = nameArray.getString(0)
+                    if (nameValue == "N") {
                         customDialog.dismiss()
-                        try {
-                            val jsonObject = JSONObject(response.toString())
-                            val responseObject = jsonObject.getJSONObject("response")
-                            val nameArray = responseObject.getJSONArray("Name")
-                            val nameValue = nameArray.getString(0)
-                            if (nameValue == "N") {
-                                progressDialog.dismiss()
-                                tts_Object?.speak(
-                                    "Please Try Again ",
-                                    TextToSpeech.QUEUE_FLUSH,
-                                    null,
-                                    null
-                                )
-                                handler.postDelayed(Runnable {
+                        tts_Object!!.speak(
+                            "Please Try Again ",
+                            TextToSpeech.QUEUE_FLUSH,
+                            null,
+                            null
+                        )
+                        handler!!.postDelayed({
+                            imageView.setImageBitmap(null)
+                            imageCaptureChecked=false
+                            Log.d(TAG, "uploadimagedb N: $imageCaptureChecked")
 
-                                }, 1000)
-                            }
-                            else if (nameValue == "U") {
-                                tts_Object?.speak(
-                                    "Welcome To A P I" + "Please Wait",
-                                    TextToSpeech.QUEUE_FLUSH,
-                                    null,
-                                    null)
-                                progressDialog.dismiss()
+                        }, 1000)
+                    } else if (nameValue == "U") {
+                        customDialog.dismiss()
 
-                                Toast.makeText(context, "U", Toast.LENGTH_SHORT).show()
-//                                )
-                            } else {
-                                val greeting: String
-                                greeting = if (hourOfDay >= 5 && hourOfDay < 12) {
-                                    "Good morning!"
-                                } else if (hourOfDay >= 12 && hourOfDay < 17) {
-                                    "Good afternoon!"
-                                } else if (hourOfDay >= 17 && hourOfDay < 21) {
-                                    "Good evening!"
-                                } else {
-                                    "Good night!"
-                                }
-
-                                Toast.makeText(context, nameValue, Toast.LENGTH_SHORT).show()
-                                tts_Object?.speak(
-                                    "$greeting $nameValue",
-                                    TextToSpeech.QUEUE_FLUSH,
-                                    null,
-                                    null)
-                                progressDialog.dismiss()
-                                progressDialog.dismiss()
-
-
-                            }
-                        } catch (e: JSONException) {
-                            throw RuntimeException(e)
+                        tts_Object!!.speak(
+                            "Welcome To A P I" + "Please Wait",
+                            TextToSpeech.QUEUE_FLUSH,
+                            null,
+                            null
+                        )
+                        imageView.setImageBitmap(null)
+                        imageCaptureChecked=false
+                        Log.d(TAG, "uploadimagedb U: $imageCaptureChecked")
+                    } else {
+                        customDialog.dismiss()
+                        val greeting: String
+                        greeting = if (hourOfDay >= 5 && hourOfDay < 12) {
+                            "Good morning!"
+                        } else if (hourOfDay >= 12 && hourOfDay < 17) {
+                            "Good afternoon!"
+                        } else if (hourOfDay >= 17 && hourOfDay < 21) {
+                            "Good evening!"
+                        } else {
+                            "Good night!"
                         }
+                        tts_Object!!.speak(
+                            "$greeting $nameValue",
+                            TextToSpeech.QUEUE_FLUSH,
+                            null,
+                            null
+                        )
+                        customToast(nameValue)
+                        imageView.setImageBitmap(null)
+                        imageCaptureChecked=false
+                        Log.d(TAG, "uploadimagedb Name: $imageCaptureChecked")
                     }
-                ) { error ->
-                    error.printStackTrace()
-
-
-                    if (error is NetworkError) {
-                        Toast.makeText(context, "Network Error", Toast.LENGTH_SHORT).show()
-
-                    } else if (error is ServerError) {
-                        Toast.makeText(context, "Server Problem", Toast.LENGTH_SHORT).show()
-
-                    } else if (error is AuthFailureError) {
-                        Toast.makeText(context, "Network AuthFailureError", Toast.LENGTH_SHORT).show()
-
-                    } else if (error is ParseError) {
-                        Toast.makeText(context, "Network ParseErrorr", Toast.LENGTH_SHORT).show()
-
-
-                    } else if (error is NoConnectionError) {
-                        Toast.makeText(context, "Network NoConnectionError", Toast.LENGTH_SHORT).show()
-
-                    } else if (error is TimeoutError) {
-                        Toast.makeText(context, "Oops. Timeout !", Toast.LENGTH_SHORT).show()
-                    }
-                    customDialog.dismiss()
+                } catch (e: JSONException) {
+                    throw RuntimeException(e)
                 }
-                requestQueue.add(jsonObjectRequest)
+            }
+        ) { error ->
+            error.printStackTrace()
+            imageView.setImageBitmap(null)
+            imageCaptureChecked=false
+            if (error is NetworkError) {
+                showToastOnUiThread("Network Error")
+            } else if (error is ServerError) {
+                showToastOnUiThread("Server Problem")
+            } else if (error is AuthFailureError) {
+                showToastOnUiThread("Network AuthFailureError")
+            } else if (error is ParseError) {
+                showToastOnUiThread("Network ParseError")
+            } else if (error is NoConnectionError) {
+                showToastOnUiThread("Network NoConnectionError")
+            } else if (error is TimeoutError) {
+                showToastOnUiThread("Oops. Timeout !")
+            }
+            customDialog.dismiss()
+        }
+        requestQueue.add(jsonObjectRequest)
+        Log.d(TAG,"Request Send Time:$requestQueue"
+        )
+        jsonObjectRequest.retryPolicy =
+            DefaultRetryPolicy(
+                4000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+            )
+    }
 
-                jsonObjectRequest.retryPolicy = DefaultRetryPolicy(
-                    6000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-                )
+    override var onFaceDetectedListener: Boolean
+        get() = TODO("Not yet implemented")
+        set(value) {
+            if (value)
+            {
+                val fragmentManager = requireActivity().supportFragmentManager
+                val transaction = fragmentManager.beginTransaction()
+                transaction.replace(R.id.fragment_container, Location_Not_Match())
+                transaction.addToBackStack(null)
+                transaction.commit()
             }
         }
+    private fun showToastOnUiThread(message: String) {
+        requireActivity().runOnUiThread {
+            if (toast != null) {
+                toast!!.cancel()
+            }
+            toast = Toast.makeText(context, message, Toast.LENGTH_SHORT)
+            toast!!.setGravity(Gravity.CENTER, 0, 0)
+            toast!!.show()
+        }
+    }
 
-    override fun callBack(data: String?) {
-        TODO("Not yet implemented")
+    @SuppressLint("UseRequireInsteadOfGet")
+    private fun customToast(name: String) {
+        activity!!.runOnUiThread {
+            toast = Toast(activity)
+           view=layoutInflater.inflate(R.layout.custom_toast, requireActivity().findViewById<ViewGroup>(R.id.custom_toast_container)
+            )
+            val e_ToastTextName =
+                view!!.findViewById<View>(R.id.e_ToastText_Name) as TextView
+            e_ToastTextName.text = name
+            toast!!.duration = Toast.LENGTH_SHORT
+            toast!!.setGravity(Gravity.CENTER_VERTICAL, 0, 0)
+            toast!!.setView(view)
+            toast!!.show()
+        }
+    }
+
+
+
+    private fun textToSpcheechMethod() {
+        tts_Object = TextToSpeech(activity) { i ->
+            if (i != TextToSpeech.ERROR) {
+                tts_Object!!.language = Locale("en", "US")
+            } else {
+                showToastOnUiThread("TextToSpeech initialization error")
+            }
+        }
     }
 
 

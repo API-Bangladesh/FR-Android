@@ -4,9 +4,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -111,16 +113,12 @@ public class Permission
         // Check if the camera permission is already granted
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_MEDIA_IMAGES)
                 == PackageManager.PERMISSION_GRANTED) {
-            // Permission already granted, do camera-related tasks here
-            // For example, you can open the camera intent or start using the camera.
-//            Intent i = new Intent(this, LivePreviewActivity.class);
-//            startActivity(i);
-//            finish();
         } else {
             // Request camera permission if not already granted
             requestStoragePermission_API_LEVEL_32(activity);
         }
     }
+
 
 
 

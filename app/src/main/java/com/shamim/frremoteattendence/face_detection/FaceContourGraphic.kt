@@ -18,8 +18,7 @@ class FaceContourGraphic(
     private val contourPaint: Paint
 
     init {
-        val selectedColor = Color.GREEN
-
+        val selectedColor = Color.WHITE
         facePositionPaint = Paint()
         facePositionPaint.color = selectedColor
 
@@ -45,17 +44,17 @@ class FaceContourGraphic(
         )
 
         // Draw the bounding box
-        //canvas?.drawRect(rect, boxPaint)
+        canvas?.drawRect(rect, boxPaint)
 
         // Calculate the center of the bounding box
         val centerX = rect.centerX()
         val centerY = rect.centerY()
 
         // Calculate the radius as a fraction of the box's width or height
-        val radius = (rect.width() + rect.height()) / 3.5
+        val radius = (rect.width() + rect.height()) / 3.4
 
         // Draw a circle at the center of the bounding box
-        canvas?.drawCircle(centerX, centerY, radius.toFloat(), contourPaint)
+        //canvas?.drawCircle(centerX, centerY, radius.toFloat(), contourPaint)
     }
 
     companion object {

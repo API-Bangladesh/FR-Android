@@ -3,7 +3,8 @@ package com.shamim.frremoteattendence.interfaces
 interface OnFaceDetectedListener
 {
 
-    fun onFaceDetected(isDetected: Boolean?)
+    fun onFaceDetected(faceImage: String?)
+    var onFaceDetectedListener:Boolean
 
-    fun onMultipleFaceDetected()
+
 }

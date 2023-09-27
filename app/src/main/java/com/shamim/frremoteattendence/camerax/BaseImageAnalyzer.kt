@@ -20,13 +20,12 @@ abstract class BaseImageAnalyzer<T>(
 
     abstract val graphicOverlay: GraphicOverlay
     private val mainHandler = Handler(Looper.getMainLooper())
-    private val backgroundHandler = Handler()
 
     @OptIn(ExperimentalGetImage::class) override fun analyze(imageProxy: ImageProxy) {
 
         val mediaImage = imageProxy.image
         val rotationDegrees = imageProxy.imageInfo.rotationDegrees
-        mediaImage?.let {
+        mediaImage?.let { it ->
             detectInImage(InputImage.fromMediaImage(it, rotationDegrees))
                 .addOnSuccessListener { results ->
                     onSuccess(
@@ -38,6 +37,7 @@ abstract class BaseImageAnalyzer<T>(
                     )
                     imageProxy.close()
                 }
+
                 .addOnFailureListener {
                     onFailure(it)
                     imageProxy.close()

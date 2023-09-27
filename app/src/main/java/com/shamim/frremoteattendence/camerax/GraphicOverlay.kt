@@ -72,15 +72,26 @@ open class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
                     right = centerX - (right - centerX)
                 }
             }
+           else if (overlay.isBackMode())
+            {
+                val centerX = overlay.width.toFloat() / 2
+                mappedBox.apply {
+                    left = centerX + (centerX - left)
+                    right = centerX - (right - centerX)
+                }
+            }
             return mappedBox
         }
     }
 
     fun isFrontMode() = cameraSelector == CameraSelector.LENS_FACING_FRONT
+    fun isBackMode() = cameraSelector == CameraSelector.LENS_FACING_BACK
+
 
     fun toggleSelector() {
         cameraSelector =
-            if (cameraSelector == CameraSelector.LENS_FACING_BACK) CameraSelector.LENS_FACING_FRONT
+            if (cameraSelector == CameraSelector.LENS_FACING_BACK)
+                CameraSelector.LENS_FACING_FRONT
             else CameraSelector.LENS_FACING_BACK
     }
 

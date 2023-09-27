@@ -7,6 +7,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -30,8 +31,8 @@ import java.util.Locale;
 
 public class LocationService extends Service {
     public static final String TAG = "LocationService";
-    private FusedLocationProviderClient fusedLocationProviderClient;
-    private LocationCallback locationCallback;
+    private static FusedLocationProviderClient fusedLocationProviderClient;
+    private static LocationCallback locationCallback;
     private LocationRequest locationRequest;
     public static float distanceInMeters;
     public static Location location;
@@ -44,10 +45,10 @@ public class LocationService extends Service {
     public void onCreate() {
         super.onCreate();
          local_location=FR_sharedpreference.Companion.getallowed_locations(this);
-
         specifiedLocation = new Location("");
         specifiedLocation.setLatitude(23.7963977);
         specifiedLocation.setLongitude(90.4024995);
+        Log.d(TAG, "Location Array: "+local_location);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000)
                 .setIntervalMillis(500).build();
@@ -86,12 +87,11 @@ public class LocationService extends Service {
             e.printStackTrace();
         }
     }
-    private void removeLocationUpdates() {
+    public static void removeLocationUpdates() {
         if (locationCallback != null) {
             fusedLocationProviderClient.removeLocationUpdates(locationCallback);
         }
-        stopForeground(true);
-        stopSelf();
+
     }
     private void onNewLocation(LocationResult locationResult) {
         location = locationResult.getLastLocation();
@@ -110,8 +110,9 @@ public class LocationService extends Service {
         // Assuming you have retrieved the `allowedLocationsArray` from SharedPreferences as shown in previous responses
         try {
             JSONArray allowedLocationsArray = new JSONArray(local_location);
+            Log.d(TAG, "Location Array: "+allowedLocationsArray);
 
-            double maxDistance = 10.0; // Maximum allowed distance in meters
+            double maxDistance = 20.0; // Maximum allowed distance in meters
             for (int i = 0; i <allowedLocationsArray.length(); i++) {
                 JSONObject locationObject = allowedLocationsArray.getJSONObject(i);
 

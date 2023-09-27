@@ -71,50 +71,6 @@ class FR_sharedpreference
             return sharedPreferences.getString("allowedlocation", "")
         }
 
-        public open fun SaveBitmap(context: Context,base64Image:String) {
-            val sharedPreferences =
-                context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
-            val editor = sharedPreferences.edit()
-            editor.putString("image", base64Image)
-            editor.apply()
-        }
-        fun getSaveBitmap(context: Context): String? {
-            val sharedPreferences = context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
-           return sharedPreferences.getString("image", "")
-        }
-        public open fun Remove_SaveBitmap(context: Context) {
-            val sharedPreferences =
-                context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
-            val editor = sharedPreferences.edit()
-            editor.remove("image")
-            editor.apply()
-        }
-
-        public open  fun saveImageResponse(context: Context,imageCheck:Boolean)
-        {
-            val sharedPreferences =
-                context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
-            val editor = sharedPreferences.edit()
-            editor.putBoolean("uploadImage", imageCheck)
-            editor.apply()
-
-        }
-
-        fun getImageResponse(context: Context): Boolean {
-            val sharedPreferences =
-                context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
-            return sharedPreferences.getBoolean("uploadImage", false)
-        }
-        public open  fun removeImageResponse(context: Context)
-        {
-            val sharedPreferences =
-                context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
-            val editor = sharedPreferences.edit()
-            editor.remove("uploadImage")
-            editor.apply()
-        }
-
-
         public open fun Remove_LoginuserName(context: Context) {
             val sharedPreferences =
                 context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
@@ -124,79 +80,32 @@ class FR_sharedpreference
         }
 
 
-      open  fun setRememberData(context: Context, name: String?, pass: String?) {
+      open  fun setRememberData(context: Context, id: String?) {
             val sharedPreferences =
                 context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
             val editor = sharedPreferences.edit()
-            editor.putString("username", name)
-            editor.putString("password", pass)
+            editor.putString("userID", id)
+
             editor.apply()
         }
 
         fun getRememberData(context: Context): String? {
             val sharedPreferences =
                 context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
-            return sharedPreferences.getString("username", "")
+            return sharedPreferences.getString("userID", "")
         }
 
-        fun Remove_RememberData(context: Context) {
+        open fun Remove_RememberData(context: Context) {
             val sharedPreferences =
                 context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
             val editor = sharedPreferences.edit()
-            editor.remove("username")
-            editor.remove("password")
-            editor.putBoolean("rememberMe", false)
+            editor.remove("userID")
             editor.apply()
         }
 
-        fun setCheckRememberData(context: Context, checkData: Boolean) {
-            val sharedPreferences =
-                context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
-            val editor = sharedPreferences.edit()
-            editor.putBoolean("rememberMe", checkData)
-            editor.apply()
-        }
-
-        fun getCheckRememberData(context: Context): Boolean {
-            val sharedPreferences =
-                context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
-            return sharedPreferences.getBoolean("rememberMe", false)
-        }
 
 
-        fun saveLocationData(
-            context: Context,
-            id: String?,
-            latitude: String?,
-            longitude: String?,
-            locationName: String?,
-            user: String?,
-            eId: String?
-        ) {
-            val sharedPreferences =
-                context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
-            val editor = sharedPreferences.edit()
-            editor.putString("ID", id)
-            editor.putString("latitude", latitude)
-            editor.putString("longitude", longitude)
-            editor.putString("location_name", locationName)
-            editor.putString("User", user)
-            editor.putString("E_ID", eId)
-            editor.apply()
-        }
 
-        fun getLocationData(context: Context): Map<String, String?>? {
-            val sharedPreferences =
-                context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
-            val locationData: MutableMap<String, String?> = HashMap()
-            locationData["ID"] = sharedPreferences.getString("ID", "")
-            locationData["latitude"] = sharedPreferences.getString("latitude", "")
-            locationData["longitude"] = sharedPreferences.getString("longitude", "")
-            locationData["location_name"] = sharedPreferences.getString("location_name", "")
-            locationData["User"] = sharedPreferences.getString("User", "")
-            locationData["E_ID"] = sharedPreferences.getString("E_ID", "")
-            return locationData
-        }
 
     }
 }

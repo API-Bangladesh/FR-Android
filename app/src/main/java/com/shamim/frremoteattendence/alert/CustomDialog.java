@@ -14,7 +14,7 @@ public class CustomDialog
 {
     private AlertDialog isDialog;
 
-    private Activity mActivity;
+    private final Activity mActivity;
 
 
     public CustomDialog(Activity activity)
@@ -27,7 +27,7 @@ public class CustomDialog
         LayoutInflater inflater = mActivity.getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.alert_dialog_layout, null);
         @SuppressLint({"MissingInflatedId", "LocalSuppress"})
-        TextView textView=(TextView) dialogView.findViewById(R.id.dialog_textView);
+        TextView textView= dialogView.findViewById(R.id.dialog_textView);
         textView.setText(textTitle);
 
 
@@ -47,10 +47,12 @@ public class CustomDialog
 
     public void dismiss() {
         if (isDialog != null && isDialog.isShowing()) {
-            if (!mActivity.isFinishing())
-            {
-                isDialog.dismiss();
-            }
+//            if (!mActivity.isFinishing())
+//            {
+//                isDialog.dismiss();
+//            }
+            isDialog.dismiss();
+
 
         }
     }

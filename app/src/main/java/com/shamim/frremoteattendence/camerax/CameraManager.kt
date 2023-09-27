@@ -14,6 +14,7 @@ import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import com.shamim.frremoteattendence.face_detection.FaceContourDetectionProcessor
+import com.shamim.frremoteattendence.interfaces.OnFaceDetectedListener
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 class CameraManager(
@@ -21,7 +22,8 @@ class CameraManager(
     private val finderView: PreviewView,
     private val lifecycleOwner: LifecycleOwner,
     private val graphicOverlay: GraphicOverlay,
-   private val imageView: ImageView
+   private val imageView: ImageView,
+   private val faceEncodeImage:OnFaceDetectedListener
 ) {
 
     private var preview: Preview? = null
@@ -44,7 +46,7 @@ class CameraManager(
     fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener(
-            Runnable {
+            {
                 cameraProvider = cameraProviderFuture.get()
 //                preview = Preview.Builder()
 //                    .build()
@@ -78,7 +80,7 @@ class CameraManager(
 
 
     private fun selectAnalyzer(): ImageAnalysis.Analyzer {
-        return FaceContourDetectionProcessor(graphicOverlay, context,imageView)
+        return FaceContourDetectionProcessor(graphicOverlay, context,imageView,faceEncodeImage)
     }
 
     private fun setCameraConfig(
