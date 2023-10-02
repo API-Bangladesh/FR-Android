@@ -6,12 +6,10 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.LocationRequest;
@@ -119,11 +117,7 @@ public class Permission
         }
     }
 
-
-
-
-
-
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     private static void  requestStoragePermission_API_LEVEL_32(Activity activity)
     {
         // Should we show an explanation for the need for camera permission?
@@ -163,27 +157,24 @@ public class Permission
         Task<LocationSettingsResponse> locationSettingsResponseTask = LocationServices.getSettingsClient(activity)
                 .checkLocationSettings(builder.build());
 
-        locationSettingsResponseTask.addOnCompleteListener(new OnCompleteListener<LocationSettingsResponse>() {
-            @Override
-            public void onComplete(@NonNull Task<LocationSettingsResponse> task) {
-                try {
-                    LocationSettingsResponse response = task.getResult(ApiException.class);
-                    gpsLocation = true;
-                } catch (ApiException e) {
-                    if (e.getStatusCode() == LocationSettingsStatusCodes.RESOLUTION_REQUIRED) {
-                        ResolvableApiException resolvableApiException = (ResolvableApiException) e;
-                        try {
-                            resolvableApiException.startResolutionForResult(activity, 101);
-                        } catch (IntentSender.SendIntentException sendIntentException) {
-                            sendIntentException.printStackTrace();
-                        }
-                    } else if (e.getStatusCode() == LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE) {
-                        Toast.makeText(activity, "Setting not available", Toast.LENGTH_SHORT).show();
-                        // Close the activity when GPS settings are unavailable
-                        gpsLocation = false;
-                        activity.finish();
-
+        locationSettingsResponseTask.addOnCompleteListener(task -> {
+            try {
+                LocationSettingsResponse response = task.getResult(ApiException.class);
+                gpsLocation = true;
+            } catch (ApiException e) {
+                if (e.getStatusCode() == LocationSettingsStatusCodes.RESOLUTION_REQUIRED) {
+                    ResolvableApiException resolvableApiException = (ResolvableApiException) e;
+                    try {
+                        resolvableApiException.startResolutionForResult(activity, 101);
+                    } catch (IntentSender.SendIntentException sendIntentException) {
+                        sendIntentException.printStackTrace();
                     }
+                } else if (e.getStatusCode() == LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE) {
+                    Toast.makeText(activity, "Setting not available", Toast.LENGTH_SHORT).show();
+                    // Close the activity when GPS settings are unavailable
+                    gpsLocation = false;
+                    activity.finish();
+
                 }
             }
         });

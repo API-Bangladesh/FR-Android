@@ -29,10 +29,6 @@ public class CustomDialog
         @SuppressLint({"MissingInflatedId", "LocalSuppress"})
         TextView textView= dialogView.findViewById(R.id.dialog_textView);
         textView.setText(textTitle);
-
-
-
-
                 // Set Dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
         builder.setView(dialogView);
@@ -47,13 +43,7 @@ public class CustomDialog
 
     public void dismiss() {
         if (isDialog != null && isDialog.isShowing()) {
-//            if (!mActivity.isFinishing())
-//            {
-//                isDialog.dismiss();
-//            }
             isDialog.dismiss();
-
-
         }
     }
 

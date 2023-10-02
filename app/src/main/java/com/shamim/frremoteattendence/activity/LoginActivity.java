@@ -184,7 +184,6 @@ public class LoginActivity extends AppCompatActivity  implements InternetCheck {
             } else if (error instanceof TimeoutError) {
                 Toast.makeText(LoginActivity.this, "Oops. Timeout !", Toast.LENGTH_LONG).show();
             }
-
             customDialog.dismiss();
             Toast.makeText(LoginActivity.this, "Error"+error, Toast.LENGTH_SHORT).show();
         });

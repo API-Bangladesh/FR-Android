@@ -106,7 +106,6 @@ public class Fragment_Changer_Activity extends AppCompatActivity implements Inte
         }, error -> {
             error.printStackTrace();
             if (error instanceof NetworkError) {
-
                 Toast.makeText(Fragment_Changer_Activity.this, "Network Error", Toast.LENGTH_SHORT).show();
             } else if (error instanceof ServerError) {
                 Toast.makeText(Fragment_Changer_Activity.this, "Server Problem", Toast.LENGTH_SHORT).show();
@@ -152,7 +151,6 @@ public class Fragment_Changer_Activity extends AppCompatActivity implements Inte
     {
         if (InternetCheck_Class.isNetworkConnected(this))
         {
-
         }
         else
         {

@@ -6,8 +6,6 @@ import android.graphics.Bitmap
 class FR_sharedpreference
 {
     companion object {
-
-
         fun setLoginToken(context: Context, token: String) {
             val sharedPreferences =
                 context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
@@ -47,8 +45,6 @@ class FR_sharedpreference
                 context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
             return sharedPreferences.getBoolean("Login", false)
         }
-
-
             fun setallowed_locations(allowedlocation: String?, context: Context) {
                 val sharedPreferences =
                     context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
@@ -62,9 +58,6 @@ class FR_sharedpreference
             editor.remove("allowedlocation")
             editor.apply()
         }
-
-
-
         fun getallowed_locations(context: Context): String? {
             val sharedPreferences =
                 context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
@@ -78,8 +71,6 @@ class FR_sharedpreference
             editor.remove("name")
             editor.apply()
         }
-
-
       open  fun setRememberData(context: Context, id: String?) {
             val sharedPreferences =
                 context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)

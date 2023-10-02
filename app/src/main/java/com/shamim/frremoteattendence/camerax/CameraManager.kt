@@ -48,24 +48,15 @@ class CameraManager(
         cameraProviderFuture.addListener(
             {
                 cameraProvider = cameraProviderFuture.get()
-//                preview = Preview.Builder()
-//                    .build()
                 preview = Preview.Builder()
                     .setTargetResolution(desiredResolution) // Set your desired resolution here
                     .build()
-
-
-//                preview = Preview.Builder()
-//                    .setTargetAspectRatio(desiredAspectRatio)
-//                    .build()
-
                 imageAnalyzer = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                     .build()
                     .also {
                         it.setAnalyzer(cameraExecutor, selectAnalyzer())
                     }
-
                 val cameraSelector = CameraSelector.Builder()
                     .requireLensFacing(cameraSelectorOption )
                     .build()
@@ -75,14 +66,9 @@ class CameraManager(
             }, ContextCompat.getMainExecutor(context)
         )
     }
-
-
-
-
     private fun selectAnalyzer(): ImageAnalysis.Analyzer {
         return FaceContourDetectionProcessor(graphicOverlay, context,imageView,faceEncodeImage)
     }
-
     private fun setCameraConfig(
         cameraProvider: ProcessCameraProvider?,
         cameraSelector: CameraSelector

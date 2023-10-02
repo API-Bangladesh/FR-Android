@@ -51,7 +51,7 @@ class FaceContourGraphic(
         val centerY = rect.centerY()
 
         // Calculate the radius as a fraction of the box's width or height
-        val radius = (rect.width() + rect.height()) / 3.4
+        val radius = (rect.width() + rect.height()) / 4
 
         // Draw a circle at the center of the bounding box
         //canvas?.drawCircle(centerX, centerY, radius.toFloat(), contourPaint)

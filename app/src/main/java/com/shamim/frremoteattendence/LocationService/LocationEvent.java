@@ -1,14 +1,11 @@
 package com.shamim.frremoteattendence.LocationService;
-
 public  class LocationEvent {
     private static Double latitude;
     private static Double longitude;
-
     public LocationEvent(Double latitude, Double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
     }
-
     public static Double getLatitude() {
         return latitude;
     }

@@ -45,21 +45,6 @@ class FaceContourDetectionProcessor(
     private var rightEyeClosed = false
     private var blinkCount = 0
     private var singleFaceCounter = 0
-
-
-    // Declare a variable to hold the listener
-
-
-//    private val realTimeOpts = FaceDetectorOptions.Builder()
-//        .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
-//        .setContourMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
-//        .setLandmarkMode( FaceDetectorOptions.LANDMARK_MODE_NONE)
-//
-//        .enableTracking()
-//        .setMinFaceSize(0.35f)
-//        .build()
-
-
     private var optionsBuilder =
         FaceDetectorOptions.Builder().setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
             .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_NONE)
@@ -74,7 +59,6 @@ class FaceContourDetectionProcessor(
     override fun detectInImage(image: InputImage): Task<List<Face>> {
         return detector.process(image)
     }
-
     override fun stop() {
         try {
             detector.close()
@@ -95,8 +79,7 @@ class FaceContourDetectionProcessor(
                     graphicOverlay.add(faceGraphic)
                     if (LocationService.location != null) {
                         val locationCheck = LocationService.checkLocationArea(
-                            LocationService.location.latitude, LocationService.location.longitude
-                        )
+                            LocationService.location.latitude, LocationService.location.longitude)
                         if (locationCheck) {
                             if (!imageCaptureChecked) {
                                 val leftEyeOpenProbability = face.leftEyeOpenProbability
@@ -149,7 +132,6 @@ class FaceContourDetectionProcessor(
                                         else
                                         {
                                             imageCaptureChecked=false
-
                                         }
 
                                     } else {
@@ -212,8 +194,6 @@ class FaceContourDetectionProcessor(
 
         return bitmap
     }
-
-
     private fun faceBitmap(captureImage: Bitmap?, faceRect: Rect): Bitmap? {
         if (captureImage != null) {
             if (faceRect.left >= 0 && faceRect.top >= 0 && faceRect.right <= captureImage.width && faceRect.bottom <= captureImage.height) {
@@ -249,10 +229,7 @@ class FaceContourDetectionProcessor(
         {
             imageCaptureChecked =false
         }
-
-
     }
-
     override fun onFailure(e: Exception) {
         Log.w(TAG, "Face Detector failed.$e")
     }
@@ -260,6 +237,5 @@ class FaceContourDetectionProcessor(
     companion object {
         private const val TAG = "FaceDetectorProcessor"
     }
-
 
 }

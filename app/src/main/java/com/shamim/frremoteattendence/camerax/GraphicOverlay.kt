@@ -86,8 +86,6 @@ open class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
 
     fun isFrontMode() = cameraSelector == CameraSelector.LENS_FACING_FRONT
     fun isBackMode() = cameraSelector == CameraSelector.LENS_FACING_BACK
-
-
     fun toggleSelector() {
         cameraSelector =
             if (cameraSelector == CameraSelector.LENS_FACING_BACK)
