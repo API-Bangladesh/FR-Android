@@ -53,10 +53,10 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
     private  lateinit var graphicOverlay_finder: GraphicOverlay
     private lateinit var previewView_finder: PreviewView
     private lateinit var imageView:ImageView
+    private lateinit var single_faceTextview:TextView
     private val url_img = "https://k7ch2z3we1.execute-api.ca-central-1.amazonaws.com/prod/APILimited"
     private lateinit var customDialog:CustomDialog
     private var handler: Handler? = null
-    private var toast: Toast? = null
     private var tts_Object: TextToSpeech? = null
     private var encodeImageString: String? = null
     private var view: View?=null
@@ -64,7 +64,13 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
         var imageCaptureChecked=false;
     }
 
+    private var toast: Toast? = null
+    private val inflater: LayoutInflater by lazy {
+        requireActivity().layoutInflater
+    }
 
+
+    @SuppressLint("MissingInflatedId")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -74,6 +80,7 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
 
         previewView_finder= view.findViewById<PreviewView>(R.id.previewView_finder)
         graphicOverlay_finder= view.findViewById<GraphicOverlay>(R.id.graphicOverlay_finder)
+        single_faceTextview=view.findViewById(R.id.single_faceTextview);
          imageView= view.findViewById<ImageView>(R.id.imageView)
         btnSwitch= view.findViewById<ImageButton>(R.id.btnSwitch)
         customDialog=CustomDialog(requireActivity())
@@ -109,7 +116,8 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
             graphicOverlay_finder
             ,
             imageView
-        ,this
+        ,this,
+            single_faceTextview
         )
         cameraManager.startCamera()
     }
@@ -132,10 +140,6 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
     override fun onRetry() {
         TODO("Not yet implemented")
     }
-
-
-
-
     private class NetworkQualityTask(private val callback: NetworkQualityCallback?) :
         AsyncTask<Void?, Void?, Boolean>() {
 
@@ -149,12 +153,11 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
                 false
             }
         }
-
         override fun onPostExecute(isGoodConnection: Boolean) {
             if (callback != null) {
                 callback.onNetworkQualityCheck(isGoodConnection)
             } else {
-//                Toast.makeText(context, "Internet Connection Poor", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this.callback, "Internet Connection Poor", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -185,8 +188,6 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
             .execute()
 
     }
-
-
     override fun onNetworkQualityCheck(isGoodConnection: Boolean) {
         if (isGoodConnection) {
             // Good connection
@@ -194,8 +195,6 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
                 uploadimagedb(encodeImageString!!)
                 encodeImageString = null
             }
-
-
         } else {
             customDialog.dismiss()
             // Poor connection
@@ -274,7 +273,6 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
                         customToast(nameValue)
                         imageView.setImageBitmap(null)
                         imageCaptureChecked=false
-                        Log.d(TAG, "uploadimagedb Name: $imageCaptureChecked")
                     }
                 } catch (e: JSONException) {
                     throw RuntimeException(e)
@@ -282,6 +280,7 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
             }
         ) { error ->
             error.printStackTrace()
+            customDialog.dismiss()
             imageView.setImageBitmap(null)
             imageCaptureChecked=false
             if (error is NetworkError) {
@@ -297,7 +296,7 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
             } else if (error is TimeoutError) {
                 showToastOnUiThread("Oops. Timeout !")
             }
-            customDialog.dismiss()
+
         }
         requestQueue.add(jsonObjectRequest)
         Log.d(TAG,"Request Send Time:$requestQueue"
@@ -332,24 +331,22 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
             toast!!.show()
         }
     }
-
     @SuppressLint("UseRequireInsteadOfGet")
     private fun customToast(name: String) {
-        activity!!.runOnUiThread {
-            toast = Toast(activity)
-           view=layoutInflater.inflate(R.layout.custom_toast, requireActivity().findViewById<ViewGroup>(R.id.custom_toast_container)
-            )
-            val e_ToastTextName =
-                view!!.findViewById<View>(R.id.e_ToastText_Name) as TextView
-            e_ToastTextName.text = name
-            toast!!.duration = Toast.LENGTH_SHORT
-            toast!!.setGravity(Gravity.CENTER_VERTICAL, 0, 0)
-            toast!!.setView(view)
+        requireActivity().runOnUiThread {
+            if (toast == null) {
+                toast = Toast(requireContext())
+                view = inflater.inflate(R.layout.custom_toast, requireActivity().findViewById<ViewGroup>(R.id.custom_toast_container))
+                toast!!.duration = Toast.LENGTH_SHORT
+                toast!!.setGravity(Gravity.CENTER_VERTICAL, 0, 0)
+                toast!!.view = view
+            }
+
+            val e_ToastTextName = view!!.findViewById<TextView>(R.id.e_ToastText_Name)
+            e_ToastTextName?.text = name // Ensure you have the correct ID for the TextView
             toast!!.show()
         }
     }
-
-
 
     private fun textToSpcheechMethod() {
         tts_Object = TextToSpeech(activity) { i ->

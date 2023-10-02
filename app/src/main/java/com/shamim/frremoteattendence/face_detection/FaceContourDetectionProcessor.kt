@@ -13,7 +13,9 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore.Images.Media.insertImage
 import android.util.Log
+import android.view.View
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.common.InputImage
@@ -35,7 +37,8 @@ class FaceContourDetectionProcessor(
     private val view: GraphicOverlay,
     private val context: Context,
     private val imageView: ImageView,
-    private val faceEncodeImage: OnFaceDetectedListener
+    private val faceEncodeImage: OnFaceDetectedListener,
+    private val singleface:TextView
 ) : BaseImageAnalyzer<List<Face>>() {
 
     private var handler: Handler = Handler(Looper.getMainLooper())
@@ -43,6 +46,7 @@ class FaceContourDetectionProcessor(
     private var prevRightEyeOpen = true
     private var leftEyeClosed = false
     private var rightEyeClosed = false
+    private var multipleFace = false
     private var blinkCount = 0
     private var singleFaceCounter = 0
     private var optionsBuilder =
@@ -51,7 +55,6 @@ class FaceContourDetectionProcessor(
             .setContourMode(FaceDetectorOptions.CONTOUR_MODE_NONE)
             .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
             .setMinFaceSize(0.35f).enableTracking().build()
-
 
     private val detector = FaceDetection.getClient(optionsBuilder)
     override val graphicOverlay: GraphicOverlay = view
@@ -74,6 +77,7 @@ class FaceContourDetectionProcessor(
         if (results.isNotEmpty()) {
             for (face in results) {
                 if (results.size == 1) {
+                    singleface.visibility = View.GONE
                     val singleFace = results[0] // Get the first detected face
                     val faceGraphic = FaceContourGraphic(graphicOverlay, singleFace, rect)
                     graphicOverlay.add(faceGraphic)
@@ -111,23 +115,17 @@ class FaceContourDetectionProcessor(
                                         blinkCount = 0
                                             val bitmapImage = toBitmap(mediaImage)
                                             val rotatedBitmap = bitmapImage?.let {
-                                                rotateBitmap(
-                                                    it, rotationDegree.toFloat()
-                                                )
-                                            }
+                                                rotateBitmap(it, rotationDegree.toFloat()) }
                                             val faceRect = face.boundingBox
                                             val faceImage: Bitmap? = faceBitmap(rotatedBitmap, faceRect)
-                                            Log.d(TAG, "Image Captured")
-                                            saveCapturedImage(faceImage)
-                                            imageView.setImageBitmap(faceImage)
+                                        saveCapturedImage(faceImage)
+                                        imageView.setImageBitmap(faceImage)
                                             val encodeImage = Encode_and_DecodeBase64Image.encodeBitmapImage(faceImage)
 
                                         if (encodeImage!=null)
                                         {
                                             imageCaptureChecked=true
-
                                             faceEncodeImage.onFaceDetected(encodeImage)
-
                                         }
                                         else
                                         {
@@ -152,22 +150,15 @@ class FaceContourDetectionProcessor(
                         }
                     }
                 } else {
-                    singleFaceCounter++
-                    if (singleFaceCounter <= 2) {
-                        Toast.makeText(context, "Please Give Single Face", Toast.LENGTH_SHORT)
-                            .show()
-                    } else {
-                        if (singleFaceCounter == 3) {
-                            handler.postDelayed({
-                                singleFaceCounter = 0
-                            }, 2000)
-                        }
-                    }
+
+                    singleface.visibility = View.VISIBLE
+
                 }
             }
         } else
         {
             imageCaptureChecked=false
+            singleface.visibility = View.GONE
         }
         graphicOverlay.postInvalidate()
     }
@@ -233,7 +224,6 @@ class FaceContourDetectionProcessor(
     override fun onFailure(e: Exception) {
         Log.w(TAG, "Face Detector failed.$e")
     }
-
     companion object {
         private const val TAG = "FaceDetectorProcessor"
     }

@@ -4,10 +4,8 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.google.android.gms.common.api.ApiException;
@@ -117,7 +115,6 @@ public class Permission
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     private static void  requestStoragePermission_API_LEVEL_32(Activity activity)
     {
         // Should we show an explanation for the need for camera permission?

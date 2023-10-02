@@ -15,7 +15,6 @@ class FR_sharedpreference
             // Commit the changes
             editor.apply()
         }
-
         fun getLoginToken(context: Context): String? {
             val sharedPreferences =
                 context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)

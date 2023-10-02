@@ -8,6 +8,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -24,38 +25,51 @@
             android:layout_height="match_parent" />
 
 
+        <TextView
+            android:id="@+id/single_faceTextview"
+            android:gravity="center"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Please give Single Face"
+            android:textStyle="bold"
+            android:textSize="40dp"
+            android:layout_marginBottom="100dp"
+            android:layout_gravity="bottom"
+            android:textColor="#780606"/>
         <LinearLayout
-            android:padding="10dp"
             android:layout_width="match_parent"
             android:layout_height="100dp"
             android:layout_gravity="bottom"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:padding="10dp">
+
             <ImageButton
                 android:id="@+id/btnSwitch"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="90dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/camera_ic"
-                android:padding="15dp"
+                android:layout_gravity="bottom"
+                android:layout_weight="1"
                 android:background="@null"
-                android:layout_gravity="bottom"/>
+                android:padding="15dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/camera_ic" />
+
             <TextView
                 android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
             <ImageView
                 android:id="@+id/imageView"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:scaleType="fitCenter"
+                android:layout_gravity="bottom"
                 android:layout_marginStart="10dp"
-                android:src="@drawable/common_full_open_on_phone"
+                android:layout_weight="1"
                 android:padding="10dp"
-                android:layout_gravity="bottom"/>
+                android:scaleType="fitCenter"
+                android:src="@drawable/common_full_open_on_phone" />
         </LinearLayout>
-
-
     </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

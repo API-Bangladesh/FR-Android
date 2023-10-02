@@ -43,6 +43,7 @@ public class CustomDialog
 
     public void dismiss() {
         if (isDialog != null && isDialog.isShowing()) {
+
             isDialog.dismiss();
         }
     }

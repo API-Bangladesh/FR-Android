@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import android.util.Size
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
@@ -23,7 +24,8 @@ class CameraManager(
     private val lifecycleOwner: LifecycleOwner,
     private val graphicOverlay: GraphicOverlay,
    private val imageView: ImageView,
-   private val faceEncodeImage:OnFaceDetectedListener
+   private val faceEncodeImage:OnFaceDetectedListener,
+    private val singleface:TextView
 ) {
 
     private var preview: Preview? = null
@@ -67,7 +69,7 @@ class CameraManager(
         )
     }
     private fun selectAnalyzer(): ImageAnalysis.Analyzer {
-        return FaceContourDetectionProcessor(graphicOverlay, context,imageView,faceEncodeImage)
+        return FaceContourDetectionProcessor(graphicOverlay, context,imageView,faceEncodeImage,singleface)
     }
     private fun setCameraConfig(
         cameraProvider: ProcessCameraProvider?,
