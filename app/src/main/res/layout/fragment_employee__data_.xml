@@ -1,14 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".fragment.Employee_Data_Fragment">
-
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Attendance Data"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textColor="@color/black"
+            android:textSize="30dp"
+            android:textStyle="bold"
+            android:padding="10dp"/>
 
-</FrameLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/datepixkerText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_horizontal"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:textSize="20dp"/>
+
+            <Button
+                android:id="@+id/datepixkerBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="70dp"
+                android:text="Choose Date Range"
+                android:layout_gravity="center_horizontal"/>
+        </LinearLayout>
+
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/datepixkerNameText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
+            android:textStyle="bold"
+            android:textColor="#05197C"
+            android:textSize="20dp"/>
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/employee_dataRV"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="5dp"/>
+    </LinearLayout>
+</RelativeLayout>

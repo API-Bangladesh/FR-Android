@@ -2,6 +2,7 @@ package com.shamim.frremoteattendence.activity;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -39,6 +40,7 @@ public class Fragment_Changer_Activity extends AppCompatActivity implements Inte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fragment_changer);
         bottomNavigationView = findViewById(R.id.bottomNavigation);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                     new LivePreview_Camera()).commit();

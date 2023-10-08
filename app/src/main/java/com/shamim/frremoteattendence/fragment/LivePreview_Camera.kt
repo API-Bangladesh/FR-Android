@@ -1,18 +1,24 @@
 package com.shamim.frremoteattendence.fragment
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Handler
+import android.os.PowerManager
+import android.os.PowerManager.WakeLock
 import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.camera.view.PreviewView
@@ -36,7 +42,6 @@ import com.shamim.frremoteattendence.interfaces.InternetCheck
 import com.shamim.frremoteattendence.interfaces.NetworkQualityCallback
 import com.shamim.frremoteattendence.interfaces.OnFaceDetectedListener
 import com.shamim.frremoteattendence.permission.Permission
-import com.shamim.frremoteattendence.sharedpreference.FR_sharedpreference
 import com.shamim.frremoteattendence.utils.InternetCheck_Class
 import org.json.JSONException
 import org.json.JSONObject
@@ -44,6 +49,7 @@ import java.io.IOException
 import java.net.InetAddress
 import java.util.Calendar
 import java.util.Locale
+
 
 class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,OnFaceDetectedListener{
     private var service: Intent? = null
@@ -60,6 +66,10 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
     private var tts_Object: TextToSpeech? = null
     private var encodeImageString: String? = null
     private var view: View?=null
+    private var wakeLock: WakeLock? = null
+    private var okToast:LinearLayout?=null
+    private var e_ToastText_Name:TextView?=null
+
     companion object{
         var imageCaptureChecked=false;
     }
@@ -71,16 +81,15 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
 
 
     @SuppressLint("MissingInflatedId")
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val view= inflater.inflate(R.layout.fragment_camera_fragent, container, false)
-
+        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         previewView_finder= view.findViewById<PreviewView>(R.id.previewView_finder)
         graphicOverlay_finder= view.findViewById<GraphicOverlay>(R.id.graphicOverlay_finder)
         single_faceTextview=view.findViewById(R.id.single_faceTextview);
+        okToast=view.findViewById(R.id.okToast)
+        e_ToastText_Name=view.findViewById(R.id.e_ToastText_Name)
          imageView= view.findViewById<ImageView>(R.id.imageView)
         btnSwitch= view.findViewById<ImageButton>(R.id.btnSwitch)
         customDialog=CustomDialog(requireActivity())
@@ -88,11 +97,24 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
 
 
         // Set the fragment as the listener for face detection events
-
+        alwaysDisplayON()
         checkInternet()
     return  view
     }
 
+    private fun alwaysDisplayON()
+    {
+        val powerManager = requireActivity().getSystemService(Context.POWER_SERVICE) as PowerManager
+        wakeLock = powerManager.newWakeLock(
+            PowerManager.FULL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
+            "LivePreview_Camera:WakeLock"
+        )
+        wakeLock?.acquire()
+
+        // Keep the screen on while your fragment is active
+        requireActivity().window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+    }
     private fun checkInternet() {
         if (InternetCheck_Class.isNetworkConnected(context)) {
             NetworkQualityTask(this)
@@ -121,7 +143,6 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
         )
         cameraManager.startCamera()
     }
-
     private fun onClicks() {
         btnSwitch.setOnClickListener {
             cameraManager.changeCameraSelector()
@@ -147,7 +168,7 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
             return try {
                 // Measure latency by pinging a known host (e.g., Google's DNS)
                 val address = InetAddress.getByName("8.8.8.8")
-                address.isReachable(2000) // Timeout in milliseconds
+                address.isReachable(4000) // Timeout in milliseconds
             } catch (e: IOException) {
                 e.printStackTrace()
                 false
@@ -156,7 +177,9 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
         override fun onPostExecute(isGoodConnection: Boolean) {
             if (callback != null) {
                 callback.onNetworkQualityCheck(isGoodConnection)
-            } else {
+
+            } else
+            {
                 Toast.makeText(this.callback, "Internet Connection Poor", Toast.LENGTH_SHORT).show()
             }
         }
@@ -177,11 +200,21 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
             tts_Object!!.shutdown()
         }
         requireContext().stopService(service)
+        wakeLock?.let {
+            if (it.isHeld) {
+                it.release()
+            }
+        }
+        requireActivity().window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
     override fun onFaceDetected(encodeImage: String?)
     {
-        customDialog.startLoading("Recognition...")
+        if(customDialog !=null)
+        {
+            customDialog.dismiss()
+        }
+        customDialog.startLoading("Recognizing...")
 
         encodeImageString=encodeImage
         NetworkQualityTask(this)
@@ -268,9 +301,10 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
                             "$greeting $nameValue",
                             TextToSpeech.QUEUE_FLUSH,
                             null,
-                            null
-                        )
-                        customToast(nameValue)
+                            null)
+                        okToast!!.visibility=View.VISIBLE
+                        e_ToastText_Name!!.text=nameValue
+                        customTextviewOK()
                         imageView.setImageBitmap(null)
                         imageCaptureChecked=false
                     }
@@ -331,21 +365,12 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
             toast!!.show()
         }
     }
-    @SuppressLint("UseRequireInsteadOfGet")
-    private fun customToast(name: String) {
-        requireActivity().runOnUiThread {
-            if (toast == null) {
-                toast = Toast(requireContext())
-                view = inflater.inflate(R.layout.custom_toast, requireActivity().findViewById<ViewGroup>(R.id.custom_toast_container))
-                toast!!.duration = Toast.LENGTH_SHORT
-                toast!!.setGravity(Gravity.CENTER_VERTICAL, 0, 0)
-                toast!!.view = view
-            }
+    private  fun customTextviewOK()
+    {
+        handler!!.postDelayed({
+            okToast!!.visibility=View.GONE
 
-            val e_ToastTextName = view!!.findViewById<TextView>(R.id.e_ToastText_Name)
-            e_ToastTextName?.text = name // Ensure you have the correct ID for the TextView
-            toast!!.show()
-        }
+        }, 1000)
     }
 
     private fun textToSpcheechMethod() {

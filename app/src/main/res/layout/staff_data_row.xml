@@ -1,187 +1,164 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:elevation="5dp"
-    android:padding="10dp"
-    app:cardCornerRadius="3dp"
-    android:layout_margin="5dp"
-    >
+    android:padding="10dp">
 
-    <LinearLayout
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp"
-        >
-
-        <LinearLayout
+        app:cardCornerRadius="10dp"
+        app:cardElevation="10dp"
+        app:cardBackgroundColor="#706F6F"
+        android:elevation="5dp">
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="5dp">
-
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_weight="1"
-                >
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="0.1"
-                    android:text="ID:"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:textColor="#000"
-                    android:paddingRight="3dp"
-                    android:textSize="15dp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/e_id_spacific"
-                    android:layout_weight="0.3"
-                    android:layout_width="0dp"
-                    android:text=""
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:textColor="#000"
-                    android:textSize="15dp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-
-
-
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_weight="1"
-                >
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="0.3"
-                    android:text="Name:"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:textColor="#000"
-                    android:paddingRight="3dp"
-                    android:textSize="15dp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/name_spacific"
-                    android:layout_weight="0.5"
-                    android:layout_width="0dp"
-                    android:text=""
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:textColor="#000"
-                    android:textSize="15dp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="5dp">
-
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_weight="1"
-                >
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="0.1"
-                    android:text="In:"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:textColor="#000"
-                    android:paddingRight="3dp"
-                    android:textSize="15dp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/intime_spacific"
-                    android:layout_weight="0.5"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:textColor="#000"
-                    android:textSize="15dp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-
-
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_weight="1"
-                >
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="0.2"
-                    android:text="Out:"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:textColor="#000"
-                    android:paddingRight="3dp"
-                    android:textSize="15dp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/outTime_spacific"
-                    android:layout_weight="0.5"
-                    android:layout_width="0dp"
-                    android:text=""
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:textColor="#000"
-                    android:textSize="15dp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            >
-            <TextView
-                android:layout_height="wrap_content"
-                android:layout_width="0dp"
-                android:layout_weight="0.5"
-                android:text="Date"
-                android:gravity="center"
-                android:textSize="15dp"
-                android:textStyle="bold"/>
+            android:orientation="vertical">
             <TextView
                 android:id="@+id/date_spacific"
                 android:layout_height="wrap_content"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:text=""
+                android:layout_width="match_parent"
+                android:text="Date :2023/01/01"
+                android:textColor="#F6DD03"
                 android:gravity="center"
-                android:textSize="15dp"
+                android:textSize="20dp"
                 android:textStyle="bold"/>
 
-        </LinearLayout>
-    </LinearLayout>
+            <LinearLayout
+                android:id="@+id/firstLayout"
+                android:layout_width="match_parent"
+                android:layout_below="@+id/date_spacific"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingLeft="10dp"
+                android:layout_gravity="center_horizontal">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginRight="5dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_weight="1"
+                    >
 
-</androidx.cardview.widget.CardView>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="0.1"
+                        android:gravity="start"
+                        android:text="In Time:"
+                        android:textColor="@color/white"
+                        android:textSize="15dp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/intime_spacific"
+                        android:layout_weight="0.7"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:textColor="@color/white"
+                        android:textSize="15dp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_weight="1"
+                    >
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="0.5"
+                        android:text="Out Time:"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="start"
+                        android:textColor="@color/white"
+                        android:textSize="15dp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/outTime_spacific"
+                        android:layout_weight="0.7"
+                        android:layout_width="0dp"
+                        android:text=""
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:textColor="@color/white"
+                        android:textSize="15dp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_below="@+id/firstLayout"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingLeft="10dp"
+                android:layout_gravity="center_horizontal">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center_horizontal"
+                >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0.1"
+                    android:gravity="start"
+                    android:text="Work Time:"
+                    android:textColor="@color/white"
+                    android:textSize="15dp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/worktime_spacific"
+                    android:layout_weight="0.7"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:textColor="@color/white"
+                    android:textSize="15dp"
+                    android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_weight="1"
+                >
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="0.5"
+                    android:text="cumulative:"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:textColor="@color/white"
+                    android:textSize="15dp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/cumulative_spacific"
+                    android:layout_weight="0.7"
+                    android:layout_width="0dp"
+                    android:text=""
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:textColor="@color/white"
+                    android:textSize="15dp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+            </LinearLayout>
+            </LinearLayout>
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>

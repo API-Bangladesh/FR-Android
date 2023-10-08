@@ -10,10 +10,7 @@
         android:id="@+id/bottom_door_lock_data"
         android:icon="@drawable/data_ic"
         android:title="Show Data" />
-    <item
-        android:id="@+id/bottom_fakeFaceDaetect"
-        android:icon="@drawable/camera_ic"
-        android:title="Future" />
+
 
     <item
         android:id="@+id/bottom_access"

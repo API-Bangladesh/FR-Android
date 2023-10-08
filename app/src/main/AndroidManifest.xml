@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-sdk tools:overrideLibrary="           androidx.camera.camera2, androidx.camera.core,           androidx.camera.view, androidx.camera.lifecycle" />
+    <uses-sdk tools:overrideLibrary="androidx.camera.camera2, androidx.camera.core,androidx.camera.view, androidx.camera.lifecycle" />
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -11,6 +11,8 @@
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
 
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature
@@ -30,7 +32,7 @@
         android:theme="@style/Theme.FRRemoteAttendence"
         tools:targetApi="31">
         <activity
-            android:name=".activity.Forgotten_password_Activity"
+            android:name=".forgottenPassword.Forgotten_password_Activity"
             android:exported="false" />
 
         <service

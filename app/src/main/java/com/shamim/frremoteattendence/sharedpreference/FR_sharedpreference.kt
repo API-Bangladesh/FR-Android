@@ -31,19 +31,37 @@ class FR_sharedpreference
             editor.apply()
         }
 
-        fun setLoginBoolean(value: Boolean, context: Context) {
+
+
+
+
+        fun setLoginE_ID(context: Context, E_ID: String) {
             val sharedPreferences =
                 context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
             val editor = sharedPreferences.edit()
-            editor.putBoolean("Login", value)
+            // Insert (save) the token
+            editor.putString("e_ID", E_ID)
+            // Commit the changes
+            editor.apply()
+        }
+        fun getLoginE_ID(context: Context): String? {
+            val sharedPreferences =
+                context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
+            return sharedPreferences.getString("e_ID", "")
+        }
+
+        fun RemoveE_ID(context: Context) {
+            val sharedPreferences =
+                context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            // Remove the token by setting it to null
+            editor.remove("e_ID")
+            // Commit the changes
             editor.apply()
         }
 
-        fun getLoginSP(context: Context): Boolean {
-            val sharedPreferences =
-                context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)
-            return sharedPreferences.getBoolean("Login", false)
-        }
+
+
             fun setallowed_locations(allowedlocation: String?, context: Context) {
                 val sharedPreferences =
                     context.getSharedPreferences("LoginAndLogoutSP", Context.MODE_PRIVATE)

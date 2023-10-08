@@ -12,6 +12,7 @@ import android.media.Image
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore.Images.Media.insertImage
+import android.provider.Settings.Secure.getString
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
@@ -32,6 +33,7 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.Random
 
+
 @SuppressLint("UnsafeOptInUsageError")
 class FaceContourDetectionProcessor(
     private val view: GraphicOverlay,
@@ -46,9 +48,7 @@ class FaceContourDetectionProcessor(
     private var prevRightEyeOpen = true
     private var leftEyeClosed = false
     private var rightEyeClosed = false
-    private var multipleFace = false
     private var blinkCount = 0
-    private var singleFaceCounter = 0
     private var optionsBuilder =
         FaceDetectorOptions.Builder().setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
             .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_NONE)
@@ -70,14 +70,17 @@ class FaceContourDetectionProcessor(
         }
     }
 
-    @SuppressLint("SuspiciousIndentation")
+    @SuppressLint("SuspiciousIndentation", "SetTextI18n")
     override fun onSuccess(results: List<Face>, graphicOverlay: GraphicOverlay, rect: Rect, mediaImage: Image, rotationDegree: Int
     ) {
         graphicOverlay.clear()
         if (results.isNotEmpty()) {
+
             for (face in results) {
                 if (results.size == 1) {
-                    singleface.visibility = View.GONE
+                    singleface.visibility=View.VISIBLE
+                    singleface.setText("Blink twice\nদুবার পলক ফেলুন!")
+
                     val singleFace = results[0] // Get the first detected face
                     val faceGraphic = FaceContourGraphic(graphicOverlay, singleFace, rect)
                     graphicOverlay.add(faceGraphic)
@@ -118,7 +121,7 @@ class FaceContourDetectionProcessor(
                                                 rotateBitmap(it, rotationDegree.toFloat()) }
                                             val faceRect = face.boundingBox
                                             val faceImage: Bitmap? = faceBitmap(rotatedBitmap, faceRect)
-                                        saveCapturedImage(faceImage)
+//                                        saveCapturedImage(faceImage)
                                         imageView.setImageBitmap(faceImage)
                                             val encodeImage = Encode_and_DecodeBase64Image.encodeBitmapImage(faceImage)
 
@@ -126,6 +129,7 @@ class FaceContourDetectionProcessor(
                                         {
                                             imageCaptureChecked=true
                                             faceEncodeImage.onFaceDetected(encodeImage)
+
                                         }
                                         else
                                         {
@@ -149,16 +153,20 @@ class FaceContourDetectionProcessor(
                             faceEncodeImage.onFaceDetectedListener = true
                         }
                     }
-                } else {
+                }
+                else {
 
                     singleface.visibility = View.VISIBLE
+                    singleface.text = "Please give Single Face"
 
                 }
             }
-        } else
+        }
+        else
         {
             imageCaptureChecked=false
             singleface.visibility = View.GONE
+
         }
         graphicOverlay.postInvalidate()
     }
@@ -208,19 +216,19 @@ class FaceContourDetectionProcessor(
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 
-    private fun saveCapturedImage(capturedBitmap: Bitmap?) {
-
-        if (capturedBitmap != null) {
-            val rand = Random()
-            val randNo = rand.nextInt()
-            val bytes = ByteArrayOutputStream()
-            capturedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
-             insertImage(context.contentResolver, capturedBitmap, randNo.toString(), null)
-        } else
-        {
-            imageCaptureChecked =false
-        }
-    }
+//    private fun saveCapturedImage(capturedBitmap: Bitmap?) {
+//
+//        if (capturedBitmap != null) {
+//            val rand = Random()
+//            val randNo = rand.nextInt()
+//            val bytes = ByteArrayOutputStream()
+//            capturedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
+//             insertImage(context.contentResolver, capturedBitmap, randNo.toString(), null)
+//        } else
+//        {
+//            imageCaptureChecked =false
+//        }
+//    }
     override fun onFailure(e: Exception) {
         Log.w(TAG, "Face Detector failed.$e")
     }

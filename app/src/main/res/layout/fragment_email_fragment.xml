@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".forgottenPassword.Email_fragment">
+    <ScrollView
+        android:id="@+id/sendEmailForgottenLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center">
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardviewLoginloyout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="30dp"
+                android:background="@drawable/custom_edit_text"
+                >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Enter Your Register Email"
+                        android:textAlignment="center"
+                        android:textColor="@color/purple_500"
+                        android:textSize="25sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/forgottenEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:layout_marginTop="40dp"
+                        android:background="@drawable/custom_edit_text"
+                        android:drawableLeft="@drawable/person_ic"
+                        android:drawablePadding="8dp"
+                        android:hint="Email"
+                        android:padding="8dp"
+                        android:textColor="@color/black"
+                        android:textSize="20dp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/forgotten_submitEmailBtn"
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="40dp"
+                        android:layout_height="50dp"
+                        android:backgroundTint="@color/purple_500"
+                        android:text="Submit"
+                        android:textSize="18dp" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </RelativeLayout>
+    </ScrollView>
+
+</RelativeLayout>

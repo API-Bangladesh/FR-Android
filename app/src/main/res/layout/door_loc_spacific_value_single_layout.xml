@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:elevation="5dp"
+    android:padding="10dp"
+    app:cardCornerRadius="3dp"
+    android:layout_margin="5dp"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center"
+        >
+        <TextView
+            android:id="@+id/date_spacific"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text=""
+            android:textColor="#F6DD03"
+            android:gravity="center"
+            android:textSize="20dp"
+            android:textStyle="bold"/>
+
+    </LinearLayout>
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center_horizontal"
+            android:padding="5dp">
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0.1"
+                    android:gravity="center"
+                    android:paddingRight="3dp"
+                    android:text="In:"
+                    android:textColor="#000"
+                    android:textSize="15dp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/intime_spacific"
+                    android:layout_weight="0.5"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:textColor="#000"
+                    android:textSize="15dp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_weight="1"
+                >
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="0.2"
+                    android:text="Out:"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:textColor="#000"
+                    android:paddingRight="3dp"
+                    android:textSize="15dp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/outTime_spacific"
+                    android:layout_weight="0.5"
+                    android:layout_width="0dp"
+                    android:text=""
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:textColor="#000"
+                    android:textSize="15dp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center_horizontal"
+            android:padding="5dp">
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="start"
+                android:layout_weight="1"
+                >
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="0.7"
+                    android:text="Work Time:"
+                    android:gravity="center"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:textColor="#000"
+                    android:textSize="15dp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/worktime_spacific"
+                    android:layout_weight="0.5"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:textColor="#000"
+                    android:textSize="15dp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_weight="1"
+                >
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="0.5"
+                    android:text="cumulative:"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:textColor="#000"
+                    android:paddingRight="3dp"
+                    android:textSize="15dp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/cumulative_spacific"
+                    android:layout_weight="0.5"
+                    android:layout_width="0dp"
+                    android:text=""
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:textColor="#000"
+                    android:textSize="15dp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

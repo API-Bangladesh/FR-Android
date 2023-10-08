@@ -23,6 +23,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.shamim.frremoteattendence.R;
 import com.shamim.frremoteattendence.alert.CustomDialog;
+import com.shamim.frremoteattendence.forgottenPassword.Forgotten_password_Activity;
 import com.shamim.frremoteattendence.interfaces.InternetCheck;
 import com.shamim.frremoteattendence.permission.Permission;
 import com.shamim.frremoteattendence.sharedpreference.FR_sharedpreference;
@@ -113,7 +114,7 @@ public class LoginActivity extends AppCompatActivity  implements InternetCheck {
         });
 
         forgottenPassword.setOnClickListener(view -> {
-            Intent forgottenIntent=new Intent(LoginActivity.this,Forgotten_password_Activity.class);
+            Intent forgottenIntent=new Intent(LoginActivity.this, Forgotten_password_Activity.class);
             startActivity(forgottenIntent);
             finish();
         });
@@ -137,10 +138,21 @@ public class LoginActivity extends AppCompatActivity  implements InternetCheck {
 
                 JSONObject jsonObject = new JSONObject(String.valueOf(response));
                 if (jsonObject.has("token")) {
-
                     String token = jsonObject.getString("token");
+                    JSONArray dataArray = jsonObject.getJSONArray("data");
+                    if (dataArray.length() > 0) {
+                        // Assuming you want data from the first item in the "data" array
+                        JSONObject dataObject = dataArray.getJSONObject(0);
+                        String eId = dataObject.getString("Employee_ID");
+                        String name = dataObject.getString("employee_name");
+                        Toast.makeText(this, eId+"\n"+name, Toast.LENGTH_SHORT).show();
+                        // Now you can use the eId and name variables as needed
+                        // For example, you can print them or use them in your application
+                    }
                     Log.d(TAG, "onResponse token: "+token);
                     FR_sharedpreference.Companion.RemoveToken(LoginActivity.this);
+                    FR_sharedpreference.Companion.RemoveE_ID(LoginActivity.this);
+                    FR_sharedpreference.Companion.setLoginE_ID(LoginActivity.this,e_ID);
                     FR_sharedpreference.Companion.setLoginToken(LoginActivity.this,token);
 
                     JSONArray allowedLocationsArray = response.getJSONArray("allowed_locations");
