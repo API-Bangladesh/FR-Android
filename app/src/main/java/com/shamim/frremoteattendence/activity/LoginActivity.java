@@ -23,6 +23,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.shamim.frremoteattendence.R;
 import com.shamim.frremoteattendence.alert.CustomDialog;
+import com.shamim.frremoteattendence.alert.CustomDialog_notification;
 import com.shamim.frremoteattendence.forgottenPassword.Forgotten_password_Activity;
 import com.shamim.frremoteattendence.interfaces.InternetCheck;
 import com.shamim.frremoteattendence.permission.Permission;

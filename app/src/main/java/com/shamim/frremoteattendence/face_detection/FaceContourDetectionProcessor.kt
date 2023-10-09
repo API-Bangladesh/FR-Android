@@ -1,7 +1,11 @@
 package com.shamim.frremoteattendence.face_detection
 
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageFormat
@@ -9,21 +13,23 @@ import android.graphics.Matrix
 import android.graphics.Rect
 import android.graphics.YuvImage
 import android.media.Image
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.provider.MediaStore.Images.Media.insertImage
-import android.provider.Settings.Secure.getString
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.app.NotificationCompat
 import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import com.shamim.frremoteattendence.LocationService.LocationService
+import com.shamim.frremoteattendence.R
+import com.shamim.frremoteattendence.alert.CustomDialog_notification
 import com.shamim.frremoteattendence.camerax.BaseImageAnalyzer
 import com.shamim.frremoteattendence.camerax.GraphicOverlay
 import com.shamim.frremoteattendence.fragment.LivePreview_Camera.Companion.imageCaptureChecked
@@ -31,7 +37,7 @@ import com.shamim.frremoteattendence.interfaces.OnFaceDetectedListener
 import com.shamim.frremoteattendence.utils.Encode_and_DecodeBase64Image
 import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.util.Random
+import java.util.Calendar
 
 
 @SuppressLint("UnsafeOptInUsageError")
@@ -43,14 +49,23 @@ class FaceContourDetectionProcessor(
     private val singleface:TextView
 ) : BaseImageAnalyzer<List<Face>>() {
 
+    private val CHANNEL_ID = "my_channel_id"
     private var handler: Handler = Handler(Looper.getMainLooper())
     private var prevLeftEyeOpen = true
     private var prevRightEyeOpen = true
     private var leftEyeClosed = false
     private var rightEyeClosed = false
     private var blinkCount = 0
-    private var optionsBuilder =
-        FaceDetectorOptions.Builder().setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+
+    private var lastCaptureTime: Long = 0
+    val currentTimeMillis = System.currentTimeMillis()
+    private val morningStartTimeMillis: Long = getMillisFromHourAndMinute(8, 0)
+    private val morningEndTimeMillis: Long = getMillisFromHourAndMinute(10, 0)
+    private val eveningStartTimeMillis: Long = getMillisFromHourAndMinute(17, 0)
+    private val eveningEndTimeMillis: Long = getMillisFromHourAndMinute(18, 0)
+
+
+    private var optionsBuilder = FaceDetectorOptions.Builder().setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
             .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_NONE)
             .setContourMode(FaceDetectorOptions.CONTOUR_MODE_NONE)
             .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
@@ -75,7 +90,6 @@ class FaceContourDetectionProcessor(
     ) {
         graphicOverlay.clear()
         if (results.isNotEmpty()) {
-
             for (face in results) {
                 if (results.size == 1) {
                     singleface.visibility=View.VISIBLE
@@ -116,7 +130,72 @@ class FaceContourDetectionProcessor(
                                 if (blinkCount == 2) {
                                     if (results.isNotEmpty()) {
                                         blinkCount = 0
-                                            val bitmapImage = toBitmap(mediaImage)
+
+                                        if (isTimeInRange(currentTimeMillis, morningStartTimeMillis, morningEndTimeMillis) ||
+                                            isTimeInRange(currentTimeMillis, eveningStartTimeMillis, eveningEndTimeMillis))
+
+                                        {
+
+                                        }
+                                        else
+                                        {
+//                                            val customDialog = CustomDialog_notification(context)
+//
+//
+//                                            val imageIconNF = BitmapFactory.decodeResource(
+//                                                context.resources,
+//                                                R.mipmap.ic_launcher
+//                                            )
+//
+//                                            val intent = Intent(context, CustomDialog_notification::class.java)
+//                                            val pendingIntent = PendingIntent.getActivity(
+//                                                context,
+//                                                /*notificationId*/ 1,
+//                                                intent,
+//                                                PendingIntent.FLAG_UPDATE_CURRENT
+//                                            )
+//
+//                                            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+//                                            val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+//                                                .setContentTitle("Image Captured")
+//                                                .setContentText("Image capture successful!")
+//                                                .setStyle(NotificationCompat.BigTextStyle())
+//                                                .setSmallIcon(R.drawable.notification_ic)
+//                                                .setAutoCancel(true) // Close the notification when tapped
+//                                                .setLargeIcon(imageIconNF)
+//                                                .setContentIntent(pendingIntent) // Set the PendingIntent here
+//                                                .build()
+//
+//                                            // Show the notification
+//                                            notificationManager.notify(/*notificationId*/1, notification)
+//                                            customDialog.show()
+//
+//                                        }
+//
+//                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                                            val channel = NotificationChannel(
+//                                                CHANNEL_ID,
+//                                                "My Notification Channel",
+//                                                NotificationManager.IMPORTANCE_DEFAULT
+//                                            )
+//                                            val notificationManager =context.getSystemService(NotificationManager::class.java)
+//                                            notificationManager.createNotificationChannel(channel)
+                                        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                        val bitmapImage = toBitmap(mediaImage)
                                             val rotatedBitmap = bitmapImage?.let {
                                                 rotateBitmap(it, rotationDegree.toFloat()) }
                                             val faceRect = face.boundingBox
@@ -196,8 +275,7 @@ class FaceContourDetectionProcessor(
     private fun faceBitmap(captureImage: Bitmap?, faceRect: Rect): Bitmap? {
         if (captureImage != null) {
             if (faceRect.left >= 0 && faceRect.top >= 0 && faceRect.right <= captureImage.width && faceRect.bottom <= captureImage.height) {
-                return Bitmap.createBitmap(
-                    captureImage, faceRect.left, faceRect.top, faceRect.width(), faceRect.height()
+                return Bitmap.createBitmap(captureImage, faceRect.left, faceRect.top, faceRect.width(), faceRect.height()
                 )
             } else {
                imageCaptureChecked=false
@@ -234,6 +312,18 @@ class FaceContourDetectionProcessor(
     }
     companion object {
         private const val TAG = "FaceDetectorProcessor"
+    }
+    private fun isTimeInRange(currentTimeMillis: Long, startTimeMillis: Long, endTimeMillis: Long): Boolean {
+        return currentTimeMillis in startTimeMillis until endTimeMillis
+    }
+
+    private fun getMillisFromHourAndMinute(hour: Int, minute: Int): Long {
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.HOUR_OF_DAY, hour)
+        calendar.set(Calendar.MINUTE, minute)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        return calendar.timeInMillis
     }
 
 }

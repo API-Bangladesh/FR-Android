@@ -3,10 +3,12 @@ package com.shamim.frremoteattendence.adapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -59,7 +61,24 @@ public class door_loc_adapter extends RecyclerView.Adapter<door_loc_adapter.myvi
         holder.totalwork.setText(model_class_data.getTotal_worked_hour_in_minutes());
         holder.cumulative.setText(model_class_data.getCumulative_work_hour());
 
+        Log.d(TAG, "worked_hour_in_minutes: "+model_class_data.getInTime());
+        if ("0".equals(model_class_data.getTotal_worked_hour_in_minutes())) {
+            Toast.makeText(context, ""+model_class_data.getInTime(), Toast.LENGTH_SHORT).show();
 
+            holder.itemView.setBackgroundResource(R.drawable.custom_item_background_color); // Use your custom drawable resource
+
+            //holder.inTime.setTextColor(context.getResources().getColor(android.R.color.holo_red_light));
+            //holder.itemView.setBackgroundResource(R.drawable.button_backround); // Replace with your custom drawable
+
+            // Set the background color to red for rows with "0.00" total work hours
+            //holder.itemView.setBackgroundColor(context.getResources().getColor(android.R.color.holo_red_light));
+        } else {
+            // Set the default background color for other rows
+            //holder.itemView.setBackgroundColor(context.getResources().getColor(android.R.color.white));
+            holder.inTime.setTextColor(context.getResources().getColor(android.R.color.black));
+
+
+        }
 
 //        if (model_class_data.getE_id() == null) {
 //            // Display a message or an empty view for null data

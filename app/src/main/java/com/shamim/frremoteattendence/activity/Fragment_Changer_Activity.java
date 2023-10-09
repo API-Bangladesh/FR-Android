@@ -19,6 +19,7 @@ import com.android.volley.toolbox.Volley;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.shamim.frremoteattendence.R;
 import com.shamim.frremoteattendence.alert.CustomDialog;
+import com.shamim.frremoteattendence.alert.CustomDialog_notification;
 import com.shamim.frremoteattendence.fragment.LivePreview_Camera;
 import com.shamim.frremoteattendence.fragment.Employee_Data_Fragment;
 import com.shamim.frremoteattendence.interfaces.InternetCheck;
@@ -41,6 +42,7 @@ public class Fragment_Changer_Activity extends AppCompatActivity implements Inte
         setContentView(R.layout.activity_fragment_changer);
         bottomNavigationView = findViewById(R.id.bottomNavigation);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                     new LivePreview_Camera()).commit();

@@ -36,6 +36,7 @@ import com.android.volley.toolbox.Volley
 import com.shamim.frremoteattendence.LocationService.LocationService
 import com.shamim.frremoteattendence.R
 import com.shamim.frremoteattendence.alert.CustomDialog
+import com.shamim.frremoteattendence.alert.CustomDialog_notification
 import com.shamim.frremoteattendence.camerax.CameraManager
 import com.shamim.frremoteattendence.camerax.GraphicOverlay
 import com.shamim.frremoteattendence.interfaces.InternetCheck
@@ -61,7 +62,7 @@ class LivePreview_Camera : Fragment(), InternetCheck , NetworkQualityCallback,On
     private lateinit var imageView:ImageView
     private lateinit var single_faceTextview:TextView
     private val url_img = "https://k7ch2z3we1.execute-api.ca-central-1.amazonaws.com/prod/APILimited"
-    private lateinit var customDialog:CustomDialog
+    private lateinit var customDialog: CustomDialog
     private var handler: Handler? = null
     private var tts_Object: TextToSpeech? = null
     private var encodeImageString: String? = null

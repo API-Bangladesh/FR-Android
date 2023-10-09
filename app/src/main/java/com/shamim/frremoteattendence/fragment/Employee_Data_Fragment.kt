@@ -19,6 +19,7 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.shamim.frremoteattendence.R
 import com.shamim.frremoteattendence.adapter.door_loc_adapter
 import com.shamim.frremoteattendence.alert.CustomDialog
+import com.shamim.frremoteattendence.alert.CustomDialog_notification
 import com.shamim.frremoteattendence.interfaces.InternetCheck
 import com.shamim.frremoteattendence.model_class.door_loc_model_class
 import com.shamim.frremoteattendence.sharedpreference.FR_sharedpreference
@@ -34,7 +35,7 @@ class Employee_Data_Fragment : Fragment() ,InternetCheck {
     private var datePickerTextview:TextView?=null
     private var datePickerBtn:Button?=null
     private var recyler:RecyclerView?=null
-    private var customDialog:CustomDialog?=null
+    private var customDialog: CustomDialog?=null
     private var list_door_all_data = ArrayList<door_loc_model_class>()
     var adapter:door_loc_adapter? = null
     var linearLayoutManager: LinearLayoutManager? = null
@@ -42,6 +43,8 @@ class Employee_Data_Fragment : Fragment() ,InternetCheck {
     var nameText:TextView?=null
     var name:String?=null
     var id:String?=null
+    var totalworkDay:String?=null
+
     @SuppressLint("MissingInflatedId", "SourceLockedOrientationActivity")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -97,8 +100,10 @@ class Employee_Data_Fragment : Fragment() ,InternetCheck {
                 { response ->
                     try {
                         val jsonArray = JSONArray(response)
-
                         list_door_all_data.clear()
+
+                        totalworkDay= jsonArray.length().toString()
+                        Log.d(TAG, "jsonArray Length: "+totalworkDay)
 
                         for (i in 0 until jsonArray.length()) {
                             val jsonObject = jsonArray.getJSONObject(i)
@@ -134,7 +139,7 @@ class Employee_Data_Fragment : Fragment() ,InternetCheck {
                         }
 
                         nameText!!.visibility = View.VISIBLE
-                        nameText!!.text = "$name ID: $id \n Total Work Time $totalCumulativeWorkHour"
+                        nameText!!.text = "$name ID: $id \n Total Work Time $totalCumulativeWorkHour"+"("+totalworkDay+")"
                         Log.d(TAG, "total work: " + totalCumulativeWorkHour)
                     } catch (e: JSONException) {
                         e.printStackTrace()
@@ -180,7 +185,7 @@ class Employee_Data_Fragment : Fragment() ,InternetCheck {
 
              selectedDateRange = "$startDateString/$endDateString"
 
-            datePickerTextview!!.text = selectedDateRange  // Update your TextView
+            datePickerTextview!!.text = "$selectedDateRange"  // Update your TextView
             if (datePickerTextview!!.text.isNotEmpty())
             {
                 id=FR_sharedpreference.getLoginE_ID(requireContext())
